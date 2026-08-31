@@ -1,0 +1,1 @@
+V15 caches the app after first online use on each PC, keeps local edits while offline, tracks pending changes, and auto-syncs to Supabase when internet returns. Sync Now is also available. A brand-new PC still needs one first online load/login.
