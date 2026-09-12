@@ -3797,7 +3797,7 @@ html.brm-auth-restoring #erpLoginProgress{display:flex!important}
 <div id="erpModuleStrip" class="erp-module-strip">
   <div class="erp-tabs" role="tablist" aria-label="ERP Modules">
     <button class="erp-tab active" data-erp-module="home" onclick="showModule('home')">⌂ Dashboard</button>
-    <button class="erp-tab" data-erp-module="cashcarry" onclick="showModule('cashcarry')">▦ Cash &amp; Carry Sales</button>
+    <div class="erp-menu" data-menu="cashcarry"><button class="erp-tab erp-menu-trigger" data-erp-module="cashcarry" onclick="showModule('cashcarry')" aria-haspopup="true">▦ Cash &amp; Carry <span class="erp-caret">▾</span></button><div class="erp-dropdown erp-dropdown-wide" role="menu"><button type="button" onclick="openCarryReport('cash')"><b>Sales Summary</b></button><button type="button" onclick="openCarryReport('items')"><b>Item-wise Sales</b></button><button type="button" onclick="openCarryReport('comparison:summary')"><b>Month Comparison Summary</b></button><button type="button" onclick="openCarryReport('comparison:detail')"><b>Detail — Expense Breakdown</b></button><button type="button" onclick="openCarryReport('costs')"><b>Cost Working / Mapping</b></button><button type="button" onclick="openCarryReport('salaries')"><b>Salary Settings</b></button><button type="button" onclick="openCarryReport('settings')"><b>Tax Settings</b></button><button type="button" onclick="openCarryReport('other')"><b>Other Sales</b></button><button type="button" onclick="openCarryReport('all')"><b>All Sales / Mapping</b></button></div></div>
     <button class="erp-tab" data-erp-module="sales" onclick="showModule('sales')">▣ Sales &amp; Production</button>
 
     <div class="erp-menu" data-menu="financial">
@@ -3879,7 +3879,7 @@ html.brm-auth-restoring #erpLoginProgress{display:flex!important}
       <div id="onlineSetupNote" class="auth-note">First registered online account automatically becomes <b>Admin</b>. Later accounts are created by Admin.</div>
       <label>Email<input id="onlineEmail" type="email" autocomplete="username" placeholder="name@company.com"></label>
       <label>Password<input id="onlinePassword" type="password" autocomplete="current-password" placeholder="Minimum 8 characters"></label>
-      <button type="button" class="auth-primary" id="onlineSignInBtn" onclick="onlineLogin()">Sign In Online</button>
+      <label style="display:flex;align-items:center;gap:8px"><input id="rememberLogin" type="checkbox" style="width:auto;margin:0">Remember me</label><button type="button" class="auth-secondary" onclick="forgotOnlinePassword()">Forgot password?</button><button type="button" class="auth-primary" id="onlineSignInBtn" onclick="onlineLogin()">Sign In Online</button>
       <button id="onlineFirstSetupBtn" class="auth-secondary" style="display:none" onclick="onlineFirstAdminSetup()">Create First Online Admin</button>
     </div>
     <div id="authMessage" class="auth-message"></div>
@@ -4628,7 +4628,8 @@ const sourceJan={"op": 10512496.32, "inv": -1861000.0, "net": 8651496.32, "openi
 const STORE="cash-flow-manager-excel-v5";
 const AUTH_LOCAL_STORE='brm-local-users-v1',AUTH_SESSION='brm-auth-session-v1';
 const SUPABASE_URL='https://txdtplbxfcewldirshdn.supabase.co',SUPABASE_PUBLISHABLE_KEY='sb_publishable_Jc4AmZMyNBh6Fol7vIuYkg_vygwdcE5';
-const supabaseClient=window.supabase?.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+const authTokenStorage={getItem:key=>localStorage.getItem('brm-remember-login-v1')==='true'?localStorage.getItem(key):sessionStorage.getItem(key),setItem:(key,value)=>{(localStorage.getItem('brm-remember-login-v1')==='true'?localStorage:sessionStorage).setItem(key,value)},removeItem:key=>{localStorage.removeItem(key);sessionStorage.removeItem(key)}};
+const supabaseClient=window.supabase?.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storage:authTokenStorage}});
 let currentAppUser=null,currentLoginMode='online';
 const CLOUD_STORES=BASE_REPORT_STORES;
 let cloudSaveTimer=null,cloudPollTimer=null,lastCloudVersion='';
@@ -4695,7 +4696,13 @@ async function onlineLogin(){
     if(!supabaseClient)throw new Error('Online login library could not load. Check internet connection.');
     const email=String(document.getElementById('onlineEmail')?.value||'').trim(),
       password=String(document.getElementById('onlinePassword')?.value||'');
+    if(!email||!document.getElementById('onlineEmail').checkValidity())throw new Error('Enter a valid email address.');
+    if(!password)throw new Error('Enter your password.');
+    const remember=!!document.getElementById('rememberLogin')?.checked;
+    localStorage.setItem('brm-remember-login-v1',String(remember));
+    localStorage.removeItem('sb-txdtplbxfcewldirshdn-auth-token');
     const{data,error}=await supabaseClient.auth.signInWithPassword({email,password});
+    document.getElementById('onlinePassword').value='';
     if(error)throw error;
     setAuthBusy(true,'Account verified','Loading latest cloud data and your report access…');
     await completeOnlineLogin(data.user);
@@ -5001,7 +5008,7 @@ function completeLogin(user){
   clearAuthRestoreState();
 }
 function applyRolePermissions(){const admin=currentAppUser?.role==='admin';document.querySelectorAll('button[onclick]').forEach(btn=>{const action=btn.getAttribute('onclick')||'';if(/clear|reset|zeroAll|delete/i.test(action))btn.classList.toggle('admin-locked',!admin);});}
-async function logoutApp(){clearInterval(cloudPollTimer);if(currentAppUser?.mode==='online'&&supabaseClient)await supabaseClient.auth.signOut();currentAppUser=null;sessionStorage.removeItem(AUTH_SESSION);document.getElementById('loginScreen')?.classList.remove('hidden');document.getElementById('logoutBtn').style.display='none';document.getElementById('manageUsersBtn').style.display='none';setCloudSyncStatus('offline','Signed out · cloud off');authMessage('Signed out successfully.',true);refreshOnlineSetupStatus();}
+async function logoutApp(){localStorage.removeItem('brm-remember-login-v1');document.getElementById('onlinePassword').value='';clearInterval(cloudPollTimer);if(currentAppUser?.mode==='online'&&supabaseClient)await supabaseClient.auth.signOut();currentAppUser=null;sessionStorage.removeItem(AUTH_SESSION);document.getElementById('loginScreen')?.classList.remove('hidden');document.getElementById('logoutBtn').style.display='none';document.getElementById('manageUsersBtn').style.display='none';setCloudSyncStatus('offline','Signed out · cloud off');authMessage('Signed out successfully.',true);refreshOnlineSetupStatus();}
 function showAuthRestoreRetry(){
   document.getElementById('loginScreen')?.classList.add('hidden');
   setAuthBusy(true,'Connection interrupted','Your saved login is retained. Retry when the connection is available.');
@@ -5014,6 +5021,8 @@ function showAuthRestoreRetry(){
   }
 }
 async function initAuth(){
+  if(window.brmPasswordRecovery){showPasswordRecovery();return;}
+  const rememberBox=document.getElementById('rememberLogin');if(rememberBox)rememberBox.checked=localStorage.getItem('brm-remember-login-v1')==='true';
   currentLoginMode='online';
   setTimeout(()=>{try{selectLoginMode('online')}catch(e){}},0);
   const local=localUsers();
@@ -5043,8 +5052,10 @@ async function initAuth(){
       if(saved?.mode==='online')setAuthBusy(true,'Restoring cloud session…','Verifying your secure login with the cloud.');
       const{data,error}=await supabaseClient.auth.getSession();
       if(error)throw error;
-      if(data.session){
-        await completeOnlineLogin(data.session.user);
+      if(window.brmPasswordRecovery){showPasswordRecovery();return;}
+      if(data.session && (saved?.mode==='online'||localStorage.getItem('brm-remember-login-v1')==='true')){
+        const verified=await supabaseClient.auth.getUser();if(verified.error)throw verified.error;
+        await completeOnlineLogin(verified.data.user);
         return;
       }
     }
@@ -9508,6 +9519,40 @@ function initProfessionalSettings(){
 
 initProfessionalSettings();
 if(localStorage.getItem('brm-header-collapsed')!=='0')document.body.classList.add('header-collapsed');
+
+let carryRequestedReport='cash';
+function openCarryReport(key){
+ if(!currentAppUser||!canViewModule('cashcarry'))return;
+ carryRequestedReport=key;showModule('cashcarry');
+ const frame=document.getElementById('cashCarryFrame');
+ const apply=()=>{const w=frame.contentWindow;const [report,detail]=carryRequestedReport.split(':');if(typeof w.tab!=='function')return;w.tab(report);if(detail)w.setComparisonReport(detail);const tabs=w.document.querySelector('.tabs');if(tabs)tabs.style.display='none';};
+ frame.onload=apply;apply();
+ document.querySelectorAll('.erp-menu.open').forEach(m=>m.classList.remove('open'));
+}
+async function forgotOnlinePassword(){
+ const email=document.getElementById('onlineEmail');
+ if(!email.value.trim()||!email.checkValidity()){authMessage('Enter your email address first.');email.focus();return;}
+ if(location.protocol==='file:'){authMessage('Open the hosted website to request a password reset.');return;}
+ if(!supabaseClient){authMessage('Login library unavailable. Check your connection.');return;}
+ const button=document.querySelector('[onclick="forgotOnlinePassword()"]');button.disabled=true;
+ try{const {error}=await supabaseClient.auth.resetPasswordForEmail(email.value.trim(),{redirectTo:location.origin+location.pathname});if(error)throw error;authMessage('If an account exists, a password reset link will be emailed. Check your inbox and spam folder.',true)}catch(e){authMessage(e.message)}finally{button.disabled=false}
+}
+function showPasswordRecovery(){
+ window.brmPasswordRecovery=true;currentAppUser=null;sessionStorage.removeItem(AUTH_SESSION);clearAuthRestoreState();
+ document.getElementById('loginScreen').classList.remove('hidden');
+ let panel=document.getElementById('passwordRecoveryPane');
+ if(!panel){panel=document.createElement('div');panel.id='passwordRecoveryPane';panel.innerHTML='<h2>Set new password</h2><label>New password<input id="recoveryPassword" type="password" autocomplete="new-password"></label><label>Confirm password<input id="recoveryConfirm" type="password" autocomplete="new-password"></label><button class="auth-primary" onclick="saveRecoveredPassword()">Update password</button>';document.getElementById('onlineLoginPane').after(panel)}
+ document.querySelectorAll('#loginScreen .auth-pane').forEach(p=>p.style.display='none');panel.style.display='block';
+}
+async function saveRecoveredPassword(){
+ const password=document.getElementById('recoveryPassword').value,confirm=document.getElementById('recoveryConfirm').value;
+ if(password.length<8)return authMessage('Use at least 8 characters.');if(password!==confirm)return authMessage('Passwords do not match.');
+ const button=document.querySelector('#passwordRecoveryPane button');button.disabled=true;
+ try{const {error}=await supabaseClient.auth.updateUser({password});if(error)throw error;await supabaseClient.auth.signOut();window.brmPasswordRecovery=false;document.getElementById('passwordRecoveryPane').remove();document.querySelectorAll('#loginScreen .auth-pane').forEach(p=>p.style.display='');document.getElementById('onlinePassword').value='';history.replaceState(null,'',location.pathname+location.search);authMessage('Password updated. Sign in with your new password.',true)}catch(e){authMessage(e.message)}finally{button.disabled=false}
+}
+window.brmPasswordRecovery=/(?:[?#&])type=recovery(?:&|$)/.test(location.hash+location.search);
+if(supabaseClient)supabaseClient.auth.onAuthStateChange(event=>{if(event==='PASSWORD_RECOVERY'){window.brmPasswordRecovery=true;setTimeout(showPasswordRecovery,0)}});
+
 renderYearManager();sync2026ManualSetupAllYears(false);applyReportFilterPreferences();render();renderSales();renderAssembly();showModule('home');initAuth();
 
 
@@ -10319,12 +10364,20 @@ window.addEventListener('DOMContentLoaded',()=>{
 </style>
 <script id="erp-pwa-safe">
 (function(){
+ let deferredPrompt=null,btn=null;
+ const installed=()=>window.matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
+ function showInstall(){if(btn)btn.style.display=installed()?'none':'block'}
+ window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();deferredPrompt=e;showInstall()});
+ window.addEventListener('appinstalled',function(){deferredPrompt=null;if(btn)btn.style.display='none'});
  window.addEventListener('load',function(){
-   let deferredPrompt=null;
-   const btn=document.createElement('button');btn.id='pwaInstallBtn';btn.type='button';btn.textContent='Install App';document.body.appendChild(btn);
-   window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();deferredPrompt=e;btn.style.display='block';});
-   btn.onclick=async function(){if(deferredPrompt){deferredPrompt.prompt();await deferredPrompt.userChoice;deferredPrompt=null;btn.style.display='none';}};
-   if('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(console.error);
+   btn=document.createElement('button');btn.id='pwaInstallBtn';btn.type='button';btn.textContent='Install App';document.body.appendChild(btn);
+   if(location.protocol==='https:'||location.hostname==='localhost')showInstall();
+   btn.onclick=async function(){
+     if(deferredPrompt){const prompt=deferredPrompt;deferredPrompt=null;btn.disabled=true;try{await prompt.prompt();const choice=await prompt.userChoice;if(choice.outcome==='accepted')btn.style.display='none'}finally{btn.disabled=false}return}
+     let dialog=document.getElementById('pwaInstallHelp');
+     if(!dialog){dialog=document.createElement('dialog');dialog.id='pwaInstallHelp';dialog.style.cssText='max-width:420px;border:1px solid #cbd5e1;border-radius:14px;padding:24px';dialog.innerHTML='<h2>Install Frozen Hub</h2><p>Chrome / Edge: open the browser menu and choose Install app or Add to home screen.</p><p>iPhone / iPad: open in Safari, tap Share, then Add to Home Screen.</p><p>If the install option is unavailable, refresh the website and try again.</p><button type="button">Close</button>';dialog.querySelector('button').onclick=()=>dialog.close();document.body.appendChild(dialog)}dialog.showModal();
+   };
+   if('serviceWorker' in navigator&&location.protocol!=='file:')navigator.serviceWorker.register('./sw.js').catch(console.error);
    const labels={home:'Dashboard',sales:'Sales & Production',financial:'Financial Summary',yearcompare:'Year Comparison',cash:'Cash Flow',assembly:'Assembly & Material',forecast:'Forecast',settings:'Settings'};
    const old=window.showModule;
    if(typeof old==='function')window.showModule=function(which){const r=old.apply(this,arguments);document.querySelectorAll('.erp-tab').forEach(b=>b.classList.toggle('active',b.dataset.erpModule===which));const bc=document.getElementById('erpBreadcrumbCurrent');if(bc)bc.textContent=labels[which]||'Dashboard';return r;};
@@ -10790,6 +10843,7 @@ window.addEventListener('DOMContentLoaded',()=>{
   const isMobile=()=>mq.matches;
 
   const menus={
+    cashcarry:{title:'Cash & Carry Reports',items:[["Sales Summary", "All locations combined", "cash"], ["Item-wise Sales", "Chain and location detail", "items"], ["Month Comparison Summary", "CTN and KG margins", "comparison:summary"], ["Detail \u2014 Expense Breakdown", "Cost components", "comparison:detail"], ["Cost Working / Mapping", "Cost sources and product mapping", "costs"], ["Salary Settings", "Monthly chain salaries", "salaries"], ["Tax Settings", "GST and WHT", "settings"], ["Other Sales", "Other customers", "other"], ["All Sales / Mapping", "Customer mapping", "all"]].map(([title,description,key])=>[title,description,()=>openCarryReport(key)])},
     financial:{
       title:'Financial Reports',
       items:[
