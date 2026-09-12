@@ -4685,7 +4685,10 @@ async function localLoginOrSetup(){
     authMessage(e.message);
   }
 }
+let onlineLoginInProgress=false;
 async function onlineLogin(){
+  if(onlineLoginInProgress)return;
+  onlineLoginInProgress=true;
   setAuthBusy(true,'Signing you in…','Connecting securely to your cloud account.');
   authMessage('');
   try{
@@ -4700,7 +4703,7 @@ async function onlineLogin(){
     setAuthBusy(false);
     document.getElementById('loginScreen')?.classList.remove('hidden');
     authMessage(e.message);
-  }
+  }finally{onlineLoginInProgress=false;}
 }
 async function refreshOnlineSetupStatus(){const btn=document.getElementById('onlineFirstSetupBtn'),note=document.getElementById('onlineSetupNote');if(!btn||!note)return false;try{const response=await fetch(`${SUPABASE_URL}/functions/v1/app-setup-status`,{headers:{apikey:SUPABASE_PUBLISHABLE_KEY}}),result=await response.json();const available=response.ok&&result.setup_available===true;btn.style.display=available?'block':'none';note.innerHTML=available?'First registered online account automatically becomes <b>Admin</b>.':'Online Admin is already configured. Please <b>Sign In Online</b>; later users are created by Admin.';return available;}catch{btn.style.display='none';return false;}}
 async function onlineFirstAdminSetup(){try{if(!supabaseClient)throw new Error('Online login library could not load.');if(!await refreshOnlineSetupStatus())throw new Error('Online Admin already exists. Please sign in.');const email=String(document.getElementById('onlineEmail')?.value||'').trim(),password=String(document.getElementById('onlinePassword')?.value||'');if(password.length<8)throw new Error('Password must be at least 8 characters.');authMessage('Creating first online account…',true);const{data,error}=await supabaseClient.auth.signUp({email,password,options:{data:{display_name:email.split('@')[0]}}});if(error)throw error;if(data.session)await completeOnlineLogin(data.user);else authMessage('Account created. Confirm your email, then use Sign In Online.',true);await refreshOnlineSetupStatus();}catch(e){authMessage(e.message);}}
@@ -4906,8 +4909,10 @@ async function hydrateCloudState(userId){
   setCloudSyncStatus('ok','Cloud up to date');
   return true;
 }
+let cloudCheckInProgress=false;
 async function checkCloudUpdates(){
-  if(currentAppUser?.mode!=='online'||document.hidden)return;
+  if(currentAppUser?.mode!=='online'||document.hidden||cloudCheckInProgress)return;
+  cloudCheckInProgress=true;
   try{
     const {data,error}=await supabaseClient
       .from('app_state').select('data,updated_at').eq('id','main').maybeSingle();
@@ -4932,7 +4937,7 @@ async function checkCloudUpdates(){
   }catch(e){
     console.warn('Cloud refresh failed:',e.message);
     setCloudSyncStatus('error','Cloud check failed');
-  }
+  }finally{cloudCheckInProgress=false;}
 }
 let cloudFocusHandlerBound=false;
 function startCloudSync(){
@@ -10906,7 +10911,7 @@ window.addEventListener('load',function(){
       if(typeof selectLoginMode==='function')selectLoginMode('online');
     });
   }
-  if(btn && !btn.dataset.boundV13){
+  if(btn && !btn.dataset.boundV13 && !btn.getAttribute('onclick')){
     btn.dataset.boundV13='1';
     btn.addEventListener('click',function(e){
       e.preventDefault();
