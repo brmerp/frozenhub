@@ -348,6 +348,8 @@ body{min-height:100vh;background:#f3f6fa}
 .assembly-side-reports,.financial-side-reports{display:none;margin:2px 0 5px 44px;padding:4px 0 4px 10px;border-left:1px solid rgba(255,255,255,.2)}
 body.assembly-active .assembly-side-reports{display:block}
 body.financial-active .financial-side-reports{display:block}
+body.sales-active .sales-side-reports{display:block}
+.sales-report-panel{display:none}.sales-report-panel.active{display:block}
 .assembly-side-link,.financial-side-link{display:block;width:100%;text-align:left;padding:7px 9px!important;margin:2px 0;background:transparent!important;color:#bbf7d0!important;border-radius:7px!important;border:0!important;box-shadow:none!important;font-size:11px!important;font-weight:700!important}
 .assembly-side-link:hover,.assembly-side-link.active,.financial-side-link:hover,.financial-side-link.active{transform:none!important;background:rgba(255,255,255,.12)!important;color:#fff!important}
 .app-topbar{position:sticky;top:0;z-index:80;margin-left:var(--sidebar);padding:13px 24px;background:rgba(255,255,255,.96);color:#172033;box-shadow:0 2px 18px rgba(15,23,42,.08);display:flex;align-items:flex-start;justify-content:space-between;gap:18px;backdrop-filter:blur(12px)}
@@ -3711,7 +3713,12 @@ html.brm-auth-restoring #erpLoginProgress{display:flex!important}
   <div class="sidebar-year-manager"><label>REPORT YEAR</label><select id="reportYearSelect" onchange="switchReportYear(this.value)"></select><button onclick="addReportYear()">＋ Add</button></div>
   <nav class="module-tabs">
     <button id="homeTab" class="module-tab active" onclick="showModule('home')"><span class="nav-icon">⌂</span><span><b>Home Dashboard</b><small>Business performance overview</small></span></button>
-    <button id="salesTab" class="module-tab" onclick="showModule('sales')"><span class="nav-icon">📦</span><span><b>Sales &amp; Production</b><small>Sales and production cost</small></span></button>
+    <button id="salesTab" class="module-tab has-submenu" onclick="showModule('sales');showSalesReport('items')"><span class="nav-icon">📦</span><span class="module-tab-copy"><b>Sales &amp; Production</b><small>Sales and production cost</small></span><span class="submenu-chevron">›</span></button>
+    <div id="salesSideReports" class="assembly-side-reports sales-side-reports" aria-hidden="true">
+      <button class="assembly-side-link active" data-side-sales-tab="items" onclick="showModule('sales');showSalesReport('items')">Item Sales Report</button>
+      <button class="assembly-side-link" data-side-sales-tab="summary" onclick="showModule('sales');showSalesReport('summary')">Monthly Sales &amp; Production</button>
+      <button class="assembly-side-link" data-side-sales-tab="production" onclick="showModule('sales');showSalesReport('production')">Item-wise Production Summary</button>
+    </div>
     <button id="financialTab" class="module-tab has-submenu" onclick="showModule('financial')"><span class="nav-icon">📊</span><span class="module-tab-copy"><b>Financial Reports</b><small>Cash Flow, P&amp;L and Balance Sheet</small></span><span class="submenu-chevron">›</span></button>
     <div id="financialSideReports" class="financial-side-reports" aria-hidden="true">
       <button class="financial-side-link active" data-financial-module="financial" onclick="showModule('financial')">Financial Summary</button>
@@ -3724,6 +3731,7 @@ html.brm-auth-restoring #erpLoginProgress{display:flex!important}
       <button class="assembly-side-link" data-side-assembly-tab="finished" onclick="showModule('assembly');showAssemblyReportTab('finished')">Finished Goods Cost/KG</button>
       <button class="assembly-side-link" data-side-assembly-tab="materials" onclick="showModule('assembly');showAssemblyReportTab('materials')">Material Summary</button>
       <button class="assembly-side-link" data-side-assembly-tab="comparison" onclick="showModule('assembly');showAssemblyReportTab('comparison')">Month Comparison</button>
+      <button class="assembly-side-link" data-side-assembly-tab="salesproduction" onclick="showModule('assembly');showAssemblyReportTab('salesproduction')">Sales &amp; Production Summary</button>
       <button class="assembly-side-link" data-side-assembly-tab="yield" onclick="showModule('assembly');showAssemblyReportTab('yield')">Potato Yield</button>
       <button class="assembly-side-link" data-side-assembly-tab="detail" onclick="showModule('assembly');showAssemblyReportTab('detail')">Assembly Detail</button>
     </div>
@@ -3799,7 +3807,7 @@ html.brm-auth-restoring #erpLoginProgress{display:flex!important}
   <div class="erp-tabs" role="tablist" aria-label="ERP Modules">
     <button class="erp-tab active" data-erp-module="home" onclick="showModule('home')">⌂ Dashboard</button>
     <div class="erp-menu" data-menu="cashcarry"><button class="erp-tab erp-menu-trigger" data-erp-module="cashcarry" onclick="showModule('cashcarry')" aria-haspopup="true">▦ Cash &amp; Carry <span class="erp-caret">▾</span></button><div class="erp-dropdown erp-dropdown-wide" role="menu"><button type="button" onclick="openCarryReport('cash')"><b>Sales Summary</b></button><button type="button" onclick="openCarryReport('items')"><b>Item-wise Sales</b></button><button type="button" onclick="openCarryReport('comparison:summary')"><b>Month Comparison Summary</b></button><button type="button" onclick="openCarryReport('comparison:detail')"><b>Detail — Expense Breakdown</b></button><button type="button" onclick="openCarryReport('costs')"><b>Cost Working / Mapping</b></button><button type="button" onclick="openCarryReport('salaries')"><b>Salary Settings</b></button><button type="button" onclick="openCarryReport('settings')"><b>Tax Settings</b></button><button type="button" onclick="openCarryReport('other')"><b>Other Sales</b></button><button type="button" onclick="openCarryReport('all')"><b>All Sales / Mapping</b></button></div></div>
-    <button class="erp-tab" data-erp-module="sales" onclick="showModule('sales')">▣ Sales &amp; Production</button>
+    <div class="erp-menu" data-menu="sales"><button class="erp-tab erp-menu-trigger" data-erp-module="sales" onclick="showModule('sales');showSalesReport('items')" aria-haspopup="true">▣ Sales &amp; Production <span class="erp-caret">▾</span></button><div class="erp-dropdown erp-dropdown-wide" role="menu"><button type="button" data-sales-sub="items" onclick="showModule('sales');showSalesReport('items')"><b>Item Sales Report</b><small>Month-wise item sales</small></button><button type="button" data-sales-sub="summary" onclick="showModule('sales');showSalesReport('summary')"><b>Monthly Sales &amp; Production</b><small>Monthly sales, production and cost</small></button><button type="button" data-sales-sub="production" onclick="showModule('sales');showSalesReport('production')"><b>Item-wise Production Summary</b><small>Production quantity and CTN/KG cost</small></button></div></div>
 
     <div class="erp-menu" data-menu="financial">
       <button class="erp-tab erp-menu-trigger" data-erp-module="financial" onclick="showModule('financial')" aria-haspopup="true">
@@ -3821,6 +3829,7 @@ html.brm-auth-restoring #erpLoginProgress{display:flex!important}
         <button type="button" data-assembly-sub="finished" onclick="showModule('assembly');showAssemblyReportTab('finished')"><b>Finished Goods Cost/KG</b><small>Finished goods costing</small></button>
         <button type="button" data-assembly-sub="materials" onclick="showModule('assembly');showAssemblyReportTab('materials')"><b>Material Summary</b><small>Material consumption</small></button>
         <button type="button" data-assembly-sub="comparison" onclick="showModule('assembly');showAssemblyReportTab('comparison')"><b>Month Comparison</b><small>Monthly assembly comparison</small></button>
+        <button type="button" data-assembly-sub="salesproduction" onclick="showModule('assembly');showAssemblyReportTab('salesproduction')"><b>Sales &amp; Production Summary</b><small>Sales, production and raw-material consumption</small></button>
         <button type="button" data-assembly-sub="yield" onclick="showModule('assembly');showAssemblyReportTab('yield')"><b>Potato Yield</b><small>Yield analysis</small></button>
         <button type="button" data-assembly-sub="detail" onclick="showModule('assembly');showAssemblyReportTab('detail')"><b>Assembly Detail</b><small>Detailed assembly records</small></button>
       </div>
@@ -4276,7 +4285,7 @@ html.brm-auth-restoring #erpLoginProgress{display:flex!important}
 <div id="salesModule" class="module">
 <div id="salesImportStatus" class="note"><b>Sales data storage preserved.</b> Same browser storage key is being used, so previously imported/manual Sales data remains available when opened from the same browser storage context. <b>Book2.xlsx starting data is also included.</b> Import the same monthly Sales Summary format; detected months replace only those months.</div>
 <div class="sales-grid" id="salesDashboard"></div>
-<div class="section">
+<div class="section sales-report-panel active" data-sales-panel="items">
   <div class="bar">
     <h2>MONTH-WISE ITEM SALES REPORT</h2>
     <div class="sales-controls">
@@ -4288,8 +4297,8 @@ html.brm-auth-restoring #erpLoginProgress{display:flex!important}
   <div class="sales-help"><b>Excel fields:</b> Item-wise <b>Sale Qty, Sale Value and Avg Price</b> are imported from the Assembly section. <b>Sales Tax 18%</b> is shown below as a LESS / minus amount.</div>
   <div class="wrap"><table id="salesTable"></table>
 </div></div>
-<div class="section"><div class="bar"><h2>MONTH-WISE SALES & PRODUCTION SUMMARY</h2><button onclick="printSalesProductionSummary()">🖨 Print Summary</button></div><div class="sales-help"><b>Automatic Assembly link:</b> Production CTN is linked automatically from monthly Assembly quantity. Production Cost = <b>Base Assembly Cost + Grocery + In Ward Freight + allocated expenses + Government Tax</b>. Allocated expenses use the same reconciled monthly source as the Finished Goods month-wise comparison. Only CTN Packing Qty remains a manual input.</div><div class="wrap"><table id="salesSummaryTable"></table></div>
-<div id="salesItemMonthSummarySection" class="sales-item-month-summary-section">
+<div class="section sales-report-panel" data-sales-panel="summary"><div class="bar"><h2>MONTH-WISE SALES & PRODUCTION SUMMARY</h2><button onclick="printSalesProductionSummary()">🖨 Print Summary</button></div><div class="sales-help"><b>Automatic Assembly link:</b> Production CTN is linked automatically from monthly Assembly quantity. Production Cost = <b>Base Assembly Cost + Grocery + In Ward Freight + allocated expenses + Government Tax</b>. Allocated expenses use the same reconciled monthly source as the Finished Goods month-wise comparison. Only CTN Packing Qty remains a manual input.</div><div class="wrap"><table id="salesSummaryTable"></table></div></div>
+<div id="salesItemMonthSummarySection" class="sales-item-month-summary-section section sales-report-panel" data-sales-panel="production">
   <div class="sales-item-summary-head">
     <div>
       <h3>ITEM-WISE MONTHLY PRODUCTION SUMMARY</h3>
@@ -4301,7 +4310,7 @@ html.brm-auth-restoring #erpLoginProgress{display:flex!important}
     </div>
   </div>
   <div id="salesItemMonthSummaryGrid" class="sales-item-month-summary-table-container"></div>
-</div></div>
+</div>
 </div>
 </div>
 
@@ -4464,6 +4473,11 @@ html.brm-auth-restoring #erpLoginProgress{display:flex!important}
     <div class="sales-help"><b>BASE COST TOTAL</b> = Base Assembly Cost + Grocery + In Ward Freight. <b>P&amp;L TOTAL EXPENSE</b> is verified from Gross Profit − Net Income for each month. <b>TOTAL EXPENSE</b> = P&amp;L Total Expense − Owner Payroll. <b>FINAL TOTAL</b> = Base Cost Total + Total Expense.</div>
     <div class="wrap"><table id="assemblyBasePnlExpenseTotalTable"></table></div>
     </div>
+  </div>
+  <div class="section assembly-report-panel" data-assembly-panel="salesproduction">
+    <div class="bar"><h2>SALES, PRODUCTION &amp; RAW MATERIAL CONSUMPTION SUMMARY</h2><div class="report-actions"><button onclick="exportAssemblyTable('assemblySalesProductionSummaryTable','Sales Production Raw Material Summary','Assembly_Sales_Production_Raw_Material_Summary.xlsx')">⬇ Export Excel</button><button onclick="printAssemblyTable('assemblySalesProductionSummaryTable','Sales, Production & Raw Material Consumption Summary')">🖨 Print</button></div></div>
+    <details class="sales-help"><summary style="cursor:pointer;font-weight:800">Show Working</summary><p>Sales values come from the Sales module. Production values come from Assembly. Raw Potato Alverstone and Raw Sweet Potato figures come from <b>Material Used / Consumption</b>; they are not taken from a purchase register. Average cost = consumed amount ÷ consumed quantity.</p></details>
+    <div class="wrap"><table id="assemblySalesProductionSummaryTable"></table></div>
   </div>
   <div class="section assembly-report-panel" data-assembly-panel="yield">
     <div class="bar"><h2>POTATO YIELD — ITEM-WISE MONTH COMPARISON</h2><div class="report-actions"><button onclick="printPotatoYieldMatrix()">🖨 Print</button><button onclick="exportPotatoYieldMatrix()">⬇ Export Excel</button></div></div>
@@ -7722,11 +7736,13 @@ function showModule(which){
   document.getElementById('forecastTab')?.classList.toggle('active',forecast);
   document.body.classList.toggle('assembly-active',assembly);
   document.body.classList.toggle('financial-active',financial||cash||yearcompare);
+  document.body.classList.toggle('sales-active',sales);
   document.body.classList.toggle('home-active',home);
   // Sidebar submenus follow the selected main module automatically.
   // No manual expand/collapse interaction is required.
   document.getElementById('financialSideReports')?.setAttribute('aria-hidden',String(!(financial||cash||yearcompare)));
   document.getElementById('assemblySideReports')?.setAttribute('aria-hidden',String(!assembly));
+  document.getElementById('salesSideReports')?.setAttribute('aria-hidden',String(!sales));
   document.querySelectorAll('.financial-side-link').forEach(x=>x.classList.toggle('active',x.dataset.financialModule===which));
   document.getElementById('cashTools')?.classList.toggle('hidden',!cash);
   document.getElementById('salesTools')?.classList.toggle('hidden',!sales);
@@ -7748,6 +7764,13 @@ function showModule(which){
   }
   if(settings)populateProfessionalSettings();
   if(forecast)renderForecastModule();
+}
+function showSalesReport(name){
+  const allowed=['items','summary','production'];if(!allowed.includes(name))name='items';
+  document.querySelectorAll('[data-sales-panel]').forEach(x=>x.classList.toggle('active',x.dataset.salesPanel===name));
+  document.querySelectorAll('[data-side-sales-tab]').forEach(x=>x.classList.toggle('active',x.dataset.sideSalesTab===name));
+  const names={items:'Item Sales Report',summary:'Monthly Sales & Production',production:'Item-wise Production Summary'},sub=document.getElementById('currentModuleSub');if(sub)sub.textContent=names[name];
+  try{sessionStorage.setItem('brm-sales-report',name)}catch(e){}
 }
 function salesMonthHasData(i){
   return Object.values(salesState.items).some(a=>{const d=a?.[i];return d&&[d.qty,d.amount].some(v=>v!=null&&Number(v)!==0);}) || Number(salesState.taxes?.[i]||0)!==0;
@@ -8464,7 +8487,7 @@ function showAssemblyReportTab(name){
   document.querySelectorAll('.assembly-report-tab').forEach(x=>x.classList.toggle('active',x.dataset.assemblyTab===name));
   document.querySelectorAll('.assembly-side-link').forEach(x=>x.classList.toggle('active',x.dataset.sideAssemblyTab===name));
   document.querySelectorAll('.assembly-report-panel').forEach(x=>x.classList.toggle('active',x.dataset.assemblyPanel===name));
-  const names={overview:'Assembly Overview',finished:'Finished Goods Cost/KG',materials:'Material Summary',comparison:'Month Comparison',yield:'Potato Yield',detail:'Assembly Detail'};
+  const names={overview:'Assembly Overview',finished:'Finished Goods Cost/KG',materials:'Material Summary',comparison:'Month Comparison',salesproduction:'Sales & Production Summary',yield:'Potato Yield',detail:'Assembly Detail'};
   const sub=document.getElementById('currentModuleSub');if(sub)sub.textContent=names[name]||'Finished goods, materials and cost per KG';
   if(name==='yield')renderPotatoYieldMatrix();
 }
@@ -8731,7 +8754,39 @@ function renderAssembly(){
     basePnlExpenseTotalTable.innerHTML=th+'</tbody>';
   }
 
+  renderAssemblySalesProductionSummary();
   renderPotatoYieldMatrix();
+}
+
+function assemblySummaryPackingWeight(product){
+  const weights=assemblyState.packingWeights||{},direct=Number(weights[product]||0);if(direct>0)return direct;
+  const norm=v=>String(v||'').replace(/\([^)]*\)/g,' ').toLowerCase().replace(/[^a-z0-9]+/g,'');
+  const key=Object.keys(weights).find(k=>norm(k)===norm(product));return Number(weights[key]||0);
+}
+function renderAssemblySalesProductionSummary(){
+  const table=document.getElementById('assemblySalesProductionSummaryTable');if(!table)return;
+  const selected=document.getElementById('assemblyMonthFilter')?.value||'all',year=Number(ACTIVE_YEAR),norm=v=>String(v||'').toLowerCase().replace(/[^a-z0-9]+/g,''),rows=[];
+  const total={saleQty:0,saleAmount:0,saleKg:0,saleKgAmount:0,prodQty:0,prodCost:0,prodKg:0,yieldPotatoQty:0,potQty:0,potAmt:0,sweetQty:0,sweetAmt:0};
+  for(let i=0;i<12;i++){
+    const monthKey=`${year}-${String(i+1).padStart(2,'0')}`;if(selected!=='all'&&selected!==monthKey)continue;
+    const monthRecords=assemblyState.records.filter(r=>r.month===monthKey);let saleQty=0,saleAmount=0,saleKg=0,saleKgAmount=0;
+    Object.entries(salesState.items||{}).forEach(([product,values])=>{const v=values?.[i]||{},qty=Number(v.qty||0),amount=Number(v.amount||0),pack=assemblySummaryPackingWeight(product);saleQty+=qty;saleAmount+=amount;if(pack>0){saleKg+=qty*pack;saleKgAmount+=amount;}});
+    let prodQty=0,prodKg=0,yieldPotatoQty=0,potQty=0,potAmt=0,sweetQty=0,sweetAmt=0;
+    monthRecords.forEach(r=>{const qty=Number(r.qty||0),pack=assemblySummaryPackingWeight(r.product);prodQty+=qty;if(pack>0)prodKg+=qty*pack;(r.materials||[]).forEach(m=>{const name=norm(m.item),used=Number(m.qty||0),amount=Number(m.amount||0);if(forecastPotatoMaterial(m))yieldPotatoQty+=used;if(name==='rawpotatoalverstone'){potQty+=used;potAmt+=amount}if(name==='rawsweetpotato'){sweetQty+=used;sweetAmt+=amount}})});
+    const prodCost=Number(assemblyProductionForSalesMonth(i).productionCost||0),x={saleQty,saleAmount,saleKg,saleKgAmount,prodQty,prodCost,prodKg,yieldPotatoQty,potQty,potAmt,sweetQty,sweetAmt,monthKey};
+    if(!(saleQty||saleAmount||prodQty||prodCost||potQty||sweetQty))continue;rows.push(x);Object.keys(total).forEach(k=>total[k]+=Number(x[k]||0));
+  }
+  const rate=(amount,qty)=>qty?amount/qty:null,show=v=>v==null?'—':money(v);
+  if(!rows.length){table.innerHTML='<thead><tr><th>PARTICULARS</th></tr></thead><tbody><tr><td>No sales, production or consumption data is available for this period.</td></tr></tbody>';return;}
+  const metrics=[
+    ['SALES','Actual Sale CTN',x=>x.saleQty],['SALES','Actual Sale Amount',x=>x.saleAmount],['SALES','Average Sale Price / CTN',x=>rate(x.saleAmount,x.saleQty)],['SALES','Sale Price / KG',x=>rate(x.saleKgAmount,x.saleKg)],
+    ['PRODUCTION','Total Production CTN',x=>x.prodQty],['PRODUCTION','Total Production Cost',x=>x.prodCost],['PRODUCTION','Production Cost / CTN',x=>rate(x.prodCost,x.prodQty)],['PRODUCTION','Production Cost / KG',x=>rate(x.prodCost,x.prodKg)],['PRODUCTION','Potato Yield %',x=>x.yieldPotatoQty?x.prodKg/x.yieldPotatoQty*100:null],
+    ['RAW POTATO ALVERSTONE','Consumed Qty',x=>x.potQty],['RAW POTATO ALVERSTONE','Consumed Amount',x=>x.potAmt],['RAW POTATO ALVERSTONE','Average Cost',x=>rate(x.potAmt,x.potQty)],
+    ['RAW SWEET POTATO','Consumed Qty',x=>x.sweetQty],['RAW SWEET POTATO','Consumed Amount',x=>x.sweetAmt],['RAW SWEET POTATO','Average Cost',x=>rate(x.sweetAmt,x.sweetQty)]
+  ];
+  let html='<thead><tr><th>CATEGORY</th><th>PARTICULARS</th>'+rows.map(x=>`<th>${escapeHtml(assemblyMonthLabel(x.monthKey))}</th>`).join('')+'<th>YTD / TOTAL</th></tr></thead><tbody>';
+  let last='';metrics.forEach(([group,label,get])=>{const first=group!==last,display=v=>label.endsWith('%')?(v==null?'—':money(v)+'%'):show(v);html+=`<tr class="${first?'assembly-head':''}"><td>${first?`<b>${escapeHtml(group)}</b>`:''}</td><td><b>${escapeHtml(label)}</b></td>`+rows.map(x=>`<td class="num">${display(get(x))}</td>`).join('')+`<td class="num"><b>${display(get(total))}</b></td></tr>`;last=group;});
+  table.innerHTML=html+'</tbody>';
 }
 async function uploadAssembly(files){
   for(const file of files){try{
@@ -10445,6 +10500,7 @@ window.addEventListener('DOMContentLoaded',()=>{
     ['settings','Settings','Company, backup, cloud and user settings']
   ];
   const REPORTS=[["assembly:overview", "Assembly \u2014 Overview", "Individual assembly report"], ["assembly:finished", "Assembly \u2014 Finished Goods Cost/KG", "Individual assembly report"], ["assembly:materials", "Assembly \u2014 Material Summary", "Individual assembly report"], ["assembly:comparison", "Assembly \u2014 Month Comparison", "Individual assembly report"], ["assembly:yield", "Assembly \u2014 Potato Yield", "Individual assembly report"], ["assembly:detail", "Assembly \u2014 Assembly Detail", "Individual assembly report"], ["cashcarry:cash", "Cash & Carry \u2014 Sales Summary", "Individual Cash & Carry report"], ["cashcarry:items", "Cash & Carry \u2014 Item-wise Sales", "Individual Cash & Carry report"], ["cashcarry:comparison:summary", "Cash & Carry \u2014 Month Comparison Summary", "Individual Cash & Carry report"], ["cashcarry:comparison:detail", "Cash & Carry \u2014 Detail Expense Breakdown", "Individual Cash & Carry report"], ["cashcarry:costs", "Cash & Carry \u2014 Cost Working / Mapping", "Individual Cash & Carry report"], ["cashcarry:salaries", "Cash & Carry \u2014 Salary Settings", "Individual Cash & Carry report"], ["cashcarry:settings", "Cash & Carry \u2014 Tax Settings", "Individual Cash & Carry report"], ["cashcarry:other", "Cash & Carry \u2014 Other Sales", "Individual Cash & Carry report"], ["cashcarry:all", "Cash & Carry \u2014 All Sales / Mapping", "Individual Cash & Carry report"]];MODULES.push(...REPORTS);
+  REPORTS.splice(4,0,['assembly:salesproduction','Assembly — Sales & Production Summary','Individual assembly report']);MODULES.push(REPORTS[4]);
   let managedUserCache=[];
 
   function store(){try{return JSON.parse(localStorage.getItem(ACCESS_STORE)||'{}')}catch{return{}}}
@@ -10887,6 +10943,7 @@ window.addEventListener('DOMContentLoaded',()=>{
 
   const menus={
     cashcarry:{title:'Cash & Carry Reports',items:[["Sales Summary", "All locations combined", "cash"], ["Item-wise Sales", "Chain and location detail", "items"], ["Month Comparison Summary", "CTN and KG margins", "comparison:summary"], ["Detail \u2014 Expense Breakdown", "Cost components", "comparison:detail"], ["Cost Working / Mapping", "Cost sources and product mapping", "costs"], ["Salary Settings", "Monthly chain salaries", "salaries"], ["Tax Settings", "GST and WHT", "settings"], ["Other Sales", "Other customers", "other"], ["All Sales / Mapping", "Customer mapping", "all"]].map(([title,description,key])=>[title,description,()=>openCarryReport(key)])},
+    sales:{title:'Sales & Production Reports',items:[['Item Sales Report','Month-wise item sales',()=>{showModule('sales');showSalesReport('items')}],['Monthly Sales & Production','Monthly sales, production and cost',()=>{showModule('sales');showSalesReport('summary')}],['Item-wise Production Summary','Production quantity and CTN/KG cost',()=>{showModule('sales');showSalesReport('production')}]]},
     financial:{
       title:'Financial Reports',
       items:[
@@ -10902,6 +10959,7 @@ window.addEventListener('DOMContentLoaded',()=>{
         ['Finished Goods Cost/KG','Finished goods costing',()=>{showModule('assembly');showAssemblyReportTab('finished')}],
         ['Material Summary','Material consumption',()=>{showModule('assembly');showAssemblyReportTab('materials')}],
         ['Month Comparison','Monthly assembly comparison',()=>{showModule('assembly');showAssemblyReportTab('comparison')}],
+        ['Sales & Production Summary','Sales, production and raw-material consumption',()=>{showModule('assembly');showAssemblyReportTab('salesproduction')}],
         ['Potato Yield','Yield analysis',()=>{showModule('assembly');showAssemblyReportTab('yield')}],
         ['Assembly Detail','Detailed assembly records',()=>{showModule('assembly');showAssemblyReportTab('detail')}]
       ]
@@ -11058,7 +11116,7 @@ wire(document,'erp');function frame(){let f=document.getElementById('cashCarryFr
 })();
 </script><script id="strict-menu-permissions">
 (function(){
-const asm=['overview','finished','materials','comparison','yield','detail'],carry=['cash','items','comparison:summary','comparison:detail','costs','salaries','settings','other','all'];
+const asm=['overview','finished','materials','comparison','salesproduction','yield','detail'],carry=['cash','items','comparison:summary','comparison:detail','costs','salaries','settings','other','all'];
 function hide(el,allowed){if(el)el.classList.toggle('permission-hidden',!allowed)}
 window.refreshAllowedMenus=function(){
  if(!currentAppUser)return;
@@ -11075,7 +11133,7 @@ window.refreshAllowedMenus=function(){
  let empty=document.getElementById('noAllowedReports');const any=['home','sales','financial','yearcompare','cash','assembly','forecast','settings','cashcarry'].some(canViewModule);
  if(!any){document.querySelectorAll('.module.active').forEach(el=>el.classList.remove('active'));if(!empty){empty=document.createElement('div');empty.id='noAllowedReports';empty.style.cssText='padding:30px';empty.textContent='No reports assigned. Please contact your administrator.';document.querySelector('main').append(empty)}}else empty?.remove();
 };
-window.allowedMobileMenuItem=function(menu,title){if(menu==='financial'){const keys={'Financial Summary':'financial','Year Comparison':'yearcompare','Cash Flow':'cash'};return canViewModule(keys[title])}const buttons=[...document.querySelectorAll('.erp-menu[data-menu="'+menu+'"] .erp-dropdown button')],button=buttons.find(b=>b.querySelector('b')?.textContent.trim()===title);if(!button)return false;const oc=button.getAttribute('onclick')||'',m=oc.match(/openCarryReport\('([^']+)'\)/);return m?canViewReport('cashcarry',m[1]):canViewReport('assembly',button.dataset.assemblySub)};
+window.allowedMobileMenuItem=function(menu,title){if(menu==='sales')return canViewModule('sales');if(menu==='financial'){const keys={'Financial Summary':'financial','Year Comparison':'yearcompare','Cash Flow':'cash'};return canViewModule(keys[title])}const buttons=[...document.querySelectorAll('.erp-menu[data-menu="'+menu+'"] .erp-dropdown button')],button=buttons.find(b=>b.querySelector('b')?.textContent.trim()===title);if(!button)return false;const oc=button.getAttribute('onclick')||'',m=oc.match(/openCarryReport\('([^']+)'\)/);return m?canViewReport('cashcarry',m[1]):canViewReport('assembly',button.dataset.assemblySub)};
 window.addEventListener('load',()=>{const old=showModule;window.showModule=function(key){if(currentAppUser&&!canViewModule(key)){if(key==='financial'){key=['financial','yearcompare','cash'].find(canViewModule);if(!key)return}else return}const result=old(key);if(currentAppUser&&key==='assembly'){const active=document.querySelector('.assembly-report-tab.active')?.dataset.assemblyTab;if(!active||!canViewReport('assembly',active)){const first=asm.find(k=>canViewReport('assembly',k));if(first)showAssemblyReportTab(first);else document.querySelectorAll('.assembly-report-panel').forEach(p=>p.classList.remove('active'))}}refreshAllowedMenus();return result};const login=completeLogin;window.completeLogin=function(user){const result=login(user);refreshAllowedMenus();return result};document.getElementById('cashCarryFrame')?.addEventListener('load',refreshAllowedMenus);refreshAllowedMenus()});
 window.addEventListener('storage',e=>{if(e.key==='brm-user-access-v1')refreshAllowedMenus()});
 })();
