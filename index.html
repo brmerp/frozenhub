@@ -350,6 +350,9 @@ body.assembly-active .assembly-side-reports{display:block}
 body.financial-active .financial-side-reports{display:block}
 body.sales-active .sales-side-reports{display:block}
 .sales-report-panel{display:none}.sales-report-panel.active{display:block}
+.summary-source-link{border:0;background:transparent;color:inherit;font:inherit;font-weight:inherit;padding:3px 5px;border-radius:6px;cursor:pointer;text-align:inherit}.summary-source-link:hover{background:#e8f0ff;color:#352bb1}.summary-source-link:focus-visible{outline:2px solid #5146d8;outline-offset:1px}@media print{.summary-source-link{padding:0;background:transparent!important;color:inherit!important}}
+.global-source-card{cursor:pointer!important;transition:transform .15s ease,box-shadow .15s ease,border-color .15s ease}.global-source-card:hover{transform:translateY(-2px);border-color:#5146d8!important;box-shadow:0 9px 24px rgba(81,70,216,.14)!important}.global-source-card:focus-visible{outline:3px solid rgba(81,70,216,.35);outline-offset:2px}@media print{.global-source-card{transform:none!important;box-shadow:none!important}}
+.global-source-row{cursor:pointer}.global-source-row:hover>td{background:#eef0ff!important;color:#282170}.global-source-row:focus-visible{outline:2px solid #5146d8;outline-offset:-2px}@media print{.global-source-row{cursor:default}.global-source-row:hover>td{background:inherit!important;color:inherit}}
 .assembly-side-link,.financial-side-link{display:block;width:100%;text-align:left;padding:7px 9px!important;margin:2px 0;background:transparent!important;color:#bbf7d0!important;border-radius:7px!important;border:0!important;box-shadow:none!important;font-size:11px!important;font-weight:700!important}
 .assembly-side-link:hover,.assembly-side-link.active,.financial-side-link:hover,.financial-side-link.active{transform:none!important;background:rgba(255,255,255,.12)!important;color:#fff!important}
 .app-topbar{position:sticky;top:0;z-index:80;margin-left:var(--sidebar);padding:13px 24px;background:rgba(255,255,255,.96);color:#172033;box-shadow:0 2px 18px rgba(15,23,42,.08);display:flex;align-items:flex-start;justify-content:space-between;gap:18px;backdrop-filter:blur(12px)}
@@ -8337,13 +8340,14 @@ function renderSales(){
     ];
   }
 
-  document.getElementById('salesDashboard').innerHTML=dashboardCards.map(c=>`
-    <div class="card">
+  const dashboardMonth=i==null?'all':`${ACTIVE_YEAR}-${String(i+1).padStart(2,'0')}`;
+  document.getElementById('salesDashboard').innerHTML=dashboardCards.map(c=>{const source=/production|cost/i.test(c[0])?'production':'sales';return`
+    <div class="card salesLink" role="button" tabindex="0" onclick="openAssemblySummarySource('${source}','${dashboardMonth}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click()}">
       <div class="label">${escapeHtml(c[0])}</div>
       <div class="value">${c[1]==null?'—':money(c[1])}</div>
       <div class="trend">${escapeHtml(c[2])}</div>
     </div>
-  `).join('');
+  `}).join('');
 
 
   // Month-wise Sales & Production summary table
@@ -8779,15 +8783,78 @@ function renderAssemblySalesProductionSummary(){
   const rate=(amount,qty)=>qty?amount/qty:null,show=v=>v==null?'—':money(v);
   if(!rows.length){table.innerHTML='<thead><tr><th>PARTICULARS</th></tr></thead><tbody><tr><td>No sales, production or consumption data is available for this period.</td></tr></tbody>';return;}
   const metrics=[
-    ['SALES','Actual Sale CTN',x=>x.saleQty],['SALES','Actual Sale Amount',x=>x.saleAmount],['SALES','Average Sale Price / CTN',x=>rate(x.saleAmount,x.saleQty)],['SALES','Sale Price / KG',x=>rate(x.saleKgAmount,x.saleKg)],
-    ['PRODUCTION','Total Production CTN',x=>x.prodQty],['PRODUCTION','Total Production Cost',x=>x.prodCost],['PRODUCTION','Production Cost / CTN',x=>rate(x.prodCost,x.prodQty)],['PRODUCTION','Production Cost / KG',x=>rate(x.prodCost,x.prodKg)],['PRODUCTION','Potato Yield %',x=>x.yieldPotatoQty?x.prodKg/x.yieldPotatoQty*100:null],
-    ['RAW POTATO ALVERSTONE','Consumed Qty',x=>x.potQty],['RAW POTATO ALVERSTONE','Consumed Amount',x=>x.potAmt],['RAW POTATO ALVERSTONE','Average Cost',x=>rate(x.potAmt,x.potQty)],
-    ['RAW SWEET POTATO','Consumed Qty',x=>x.sweetQty],['RAW SWEET POTATO','Consumed Amount',x=>x.sweetAmt],['RAW SWEET POTATO','Average Cost',x=>rate(x.sweetAmt,x.sweetQty)]
+    ['SALES','Actual Sale CTN',x=>x.saleQty,'sales'],['SALES','Actual Sale Amount',x=>x.saleAmount,'sales'],['SALES','Average Sale Price / CTN',x=>rate(x.saleAmount,x.saleQty),'sales'],['SALES','Sale Price / KG',x=>rate(x.saleKgAmount,x.saleKg),'sales'],
+    ['PRODUCTION','Total Production CTN',x=>x.prodQty,'production'],['PRODUCTION','Total Production Cost',x=>x.prodCost,'production'],['PRODUCTION','Production Cost / CTN',x=>rate(x.prodCost,x.prodQty),'production'],['PRODUCTION','Production Cost / KG',x=>rate(x.prodCost,x.prodKg),'production'],['PRODUCTION','Potato Yield %',x=>x.yieldPotatoQty?x.prodKg/x.yieldPotatoQty*100:null,'yield'],
+    ['RAW POTATO ALVERSTONE','Consumed Qty',x=>x.potQty,'potato'],['RAW POTATO ALVERSTONE','Consumed Amount',x=>x.potAmt,'potato'],['RAW POTATO ALVERSTONE','Average Cost',x=>rate(x.potAmt,x.potQty),'potato'],
+    ['RAW SWEET POTATO','Consumed Qty',x=>x.sweetQty,'sweet'],['RAW SWEET POTATO','Consumed Amount',x=>x.sweetAmt,'sweet'],['RAW SWEET POTATO','Average Cost',x=>rate(x.sweetAmt,x.sweetQty),'sweet']
   ];
   let html='<thead><tr><th>CATEGORY</th><th>PARTICULARS</th>'+rows.map(x=>`<th>${escapeHtml(assemblyMonthLabel(x.monthKey))}</th>`).join('')+'<th>YTD / TOTAL</th></tr></thead><tbody>';
-  let last='';metrics.forEach(([group,label,get])=>{const first=group!==last,display=v=>label.endsWith('%')?(v==null?'—':money(v)+'%'):show(v);html+=`<tr class="${first?'assembly-head':''}"><td>${first?`<b>${escapeHtml(group)}</b>`:''}</td><td><b>${escapeHtml(label)}</b></td>`+rows.map(x=>`<td class="num">${display(get(x))}</td>`).join('')+`<td class="num"><b>${display(get(total))}</b></td></tr>`;last=group;});
+  const link=(source,month,text)=>`<button type="button" class="summary-source-link" onclick="openAssemblySummarySource('${source}','${month}')">${text}</button>`;
+  let last='';metrics.forEach(([group,label,get,source])=>{const first=group!==last,display=v=>label.endsWith('%')?(v==null?'—':money(v)+'%'):show(v);html+=`<tr class="${first?'assembly-head':''}"><td>${first?`<b>${link(source,'all',escapeHtml(group))}</b>`:''}</td><td><b>${link(source,'all',escapeHtml(label))}</b></td>`+rows.map(x=>`<td class="num">${link(source,x.monthKey,display(get(x)))}</td>`).join('')+`<td class="num"><b>${link(source,'all',display(get(total)))}</b></td></tr>`;last=group;});
   table.innerHTML=html+'</tbody>';
 }
+function openAssemblySummarySource(source,monthKey='all'){
+  if(source==='sales'){
+    if(currentAppUser&&!canViewModule('sales')){alert('Sales report is not assigned to this user.');return;}
+    showModule('sales');showSalesReport('items');const f=document.getElementById('salesMonthFilter');if(f){f.value=monthKey==='all'?'all':String(Math.max(0,Number(monthKey.split('-')[1])-1));}const q=document.getElementById('salesSearch');if(q)q.value='';renderSales();return;
+  }
+  const report=source==='yield'?'yield':source==='production'?'comparison':'materials';
+  if(currentAppUser&&!canViewReport('assembly',report)){alert('Source report is not assigned to this user.');return;}
+  showModule('assembly');const f=document.getElementById('assemblyMonthFilter');if(f)f.value=monthKey;const q=document.getElementById('assemblySearch');if(q)q.value=source==='potato'?'Raw Potato Alverstone':source==='sweet'?'Raw Sweet Potato':'';renderAssembly();showAssemblyReportTab(report);
+}
+function globalCardSource(card){
+  if(card.closest('#salesDashboard'))return null;
+  const text=(card.textContent||'').toLowerCase();
+  if(card.classList.contains('home-sales-card'))return 'sales';
+  if(card.classList.contains('home-production-card'))return 'production';
+  if(card.classList.contains('home-pnl-card')||card.classList.contains('home-bs-card')||card.classList.contains('fin-card'))return 'financial';
+  if(card.classList.contains('home-potato-card')||card.classList.contains('yield-kpi')||/yield/.test(text))return 'yield';
+  if(/\bsale|revenue/.test(text))return 'sales';
+  if(/production|finished goods|product/.test(text))return 'production';
+  if(/material|unmatched|assemblies|assembly/.test(text))return /material/.test(text)?'materials':'assemblydetail';
+  if(/profit|income|expense|asset|liabilit|equity|balance sheet|p&l/.test(text))return 'financial';
+  if(card.classList.contains('year-compare-kpi'))return 'yearcompare';
+  if(card.closest('#cashModule')||/cash flow|cash balance/.test(text))return 'cash';
+  return null;
+}
+function openGlobalCardSource(source){
+  if(['sales','financial','yearcompare','cash'].includes(source)){
+    if(currentAppUser&&!canViewModule(source)){alert('Source report is not assigned to this user.');return;}
+    showModule(source);if(source==='sales')showSalesReport('items');return;
+  }
+  const report=source==='yield'?'yield':source==='materials'?'materials':source==='assemblydetail'?'detail':'comparison';
+  if(currentAppUser&&!canViewReport('assembly',report)){alert('Source report is not assigned to this user.');return;}
+  showModule('assembly');showAssemblyReportTab(report);
+}
+function applyGlobalSourceCards(root=document){
+  root.querySelectorAll('.home-kpi,.home-chart-card,.home-summary-card,.home-potato-card,.assembly-card,.fin-card,.year-compare-kpi,.yield-kpi,.dash-card,#dashboardCards .card').forEach(card=>{
+    if(card.dataset.globalSourceReady)return;const source=globalCardSource(card);if(!source)return;card.dataset.globalSourceReady='1';card.dataset.globalSource=source;card.classList.add('global-source-card');card.setAttribute('role','button');card.tabIndex=0;card.title='Open source report';card.addEventListener('click',e=>{if(e.target.closest('button,a,input,select,textarea'))return;e.stopPropagation();openGlobalCardSource(source)});card.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&!e.target.closest('button,a,input,select,textarea')){e.preventDefault();e.stopPropagation();openGlobalCardSource(source)}});
+  });
+}
+const GLOBAL_REPORT_TABLES=new Set(['forecastScenarioTable','forecastScenarioItemTable','forecastProductMixTable','report','salesTable','salesSummaryTable','finPLDetailTable','finBSDetailTable','finPLTable','finBSTable','finProfitTable','yearCompareSummaryTable','yearCompareProductionTable','yearCompareMonthlyTable','yearCompareItemMonthlyTable','finishedGoodsMonthlyTable','materialMonthlyTable','assemblyMonthlyTable','assemblyExpenseBreakupTable','assemblyBasePnlExpenseTotalTable','potatoYieldMatrixTable','assemblyDetailTable','salesItemMonthlyMatrixTable']);
+function reportRowMonthKey(row){
+  const text=row.textContent||'',match=text.match(/\b(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s+(20\d{2})\b/i);if(!match)return 'all';const index=['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'].indexOf(match[1].slice(0,3).toLowerCase());return `${match[2]}-${String(index+1).padStart(2,'0')}`;
+}
+function focusAssemblySource(report,row,search=''){
+  if(currentAppUser&&!canViewReport('assembly',report)){alert('Source report is not assigned to this user.');return;}showModule('assembly');const month=reportRowMonthKey(row),mf=document.getElementById('assemblyMonthFilter'),q=document.getElementById('assemblySearch');if(mf)mf.value=month;if(q)q.value=search;renderAssembly();showAssemblyReportTab(report);
+}
+function openGlobalReportRow(table,row,cell){
+  const id=table.id,first=(row.cells[0]?.textContent||'').trim(),header=(table.tHead?.rows[table.tHead.rows.length-1]?.cells[cell.cellIndex]?.textContent||'').toLowerCase(),month=reportRowMonthKey(row);
+  if(id==='salesTable'){showModule('sales');showSalesReport('items');const q=document.getElementById('salesSearch');if(q)q.value=first;renderSales();return;}
+  if(id==='salesSummaryTable'){openAssemblySummarySource(/production|cost|margin/i.test(header)?'production':'sales',month);return;}
+  if(id==='finishedGoodsMonthlyTable'||id==='assemblyMonthlyTable'||id==='potatoYieldMatrixTable'){const product=first.replace(/^\S+\s+\d{4}\s*[·\-]?\s*/,'').split(' · ')[0].trim();focusAssemblySource(id==='potatoYieldMatrixTable'?'yield':'detail',row,product);return;}
+  if(id==='materialMonthlyTable'){const material=first.includes(' · ')?first.split(' · ').slice(1).join(' · ').trim():first;focusAssemblySource('detail',row,material);return;}
+  if(id==='assemblyExpenseBreakupTable'||id==='assemblyBasePnlExpenseTotalTable'){if(currentAppUser&&!canViewModule('financial')){alert('Financial report is not assigned to this user.');return;}showModule('financial');document.getElementById('finPLDetailTable')?.scrollIntoView({behavior:'smooth',block:'start'});return;}
+  if(['finPLTable','finProfitTable'].includes(id)){showModule('financial');document.getElementById('finPLDetailTable')?.scrollIntoView({behavior:'smooth',block:'start'});return;}
+  if(id==='finBSTable'){showModule('financial');document.getElementById('finBSDetailTable')?.scrollIntoView({behavior:'smooth',block:'start'});return;}
+  if(id.startsWith('yearCompare')){showModule('yearcompare');table.scrollIntoView({behavior:'smooth',block:'start'});return;}
+  if(id.startsWith('forecast')){showModule('forecast');table.scrollIntoView({behavior:'smooth',block:'start'});return;}
+  if(id==='salesItemMonthlyMatrixTable'){showModule('sales');showSalesReport('production');const q=document.getElementById('salesSearch');if(q)q.value=first;renderSales();return;}
+  if(id==='report'){showModule('cash');table.scrollIntoView({behavior:'smooth',block:'start'});return;}
+  if(id==='assemblyDetailTable'||id==='finPLDetailTable'||id==='finBSDetailTable'){table.scrollIntoView({behavior:'smooth',block:'start'});}
+}
+function applyGlobalReportLinks(root=document){root.querySelectorAll('table[id]').forEach(table=>{if(!GLOBAL_REPORT_TABLES.has(table.id)||table.id==='assemblySalesProductionSummaryTable')return;table.querySelectorAll('tbody tr').forEach(row=>{if(row.dataset.globalSourceReady)return;row.dataset.globalSourceReady='1';row.classList.add('global-source-row');row.tabIndex=0;row.title='Open source report';row.addEventListener('click',e=>{if(e.target.closest('button,a,input,select,textarea'))return;openGlobalReportRow(table,row,e.target.closest('td')||row.cells[0])});row.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&!e.target.closest('button,a,input,select,textarea')){e.preventDefault();openGlobalReportRow(table,row,row.cells[0])}})})})}
+window.addEventListener('load',()=>{applyGlobalSourceCards();applyGlobalReportLinks();new MutationObserver(()=>{applyGlobalSourceCards();applyGlobalReportLinks()}).observe(document.body,{childList:true,subtree:true})});
 async function uploadAssembly(files){
   for(const file of files){try{
     // Keep Excel dates as their original serial numbers. Converting them to
