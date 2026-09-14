@@ -353,6 +353,7 @@ body.sales-active .sales-side-reports{display:block}
 .summary-source-link{border:0;background:transparent;color:inherit;font:inherit;font-weight:inherit;padding:3px 5px;border-radius:6px;cursor:pointer;text-align:inherit}.summary-source-link:hover{background:#e8f0ff;color:#352bb1}.summary-source-link:focus-visible{outline:2px solid #5146d8;outline-offset:1px}@media print{.summary-source-link{padding:0;background:transparent!important;color:inherit!important}}
 .global-source-card{cursor:pointer!important;transition:transform .15s ease,box-shadow .15s ease,border-color .15s ease}.global-source-card:hover{transform:translateY(-2px);border-color:#5146d8!important;box-shadow:0 9px 24px rgba(81,70,216,.14)!important}.global-source-card:focus-visible{outline:3px solid rgba(81,70,216,.35);outline-offset:2px}@media print{.global-source-card{transform:none!important;box-shadow:none!important}}
 .global-source-row{cursor:pointer}.global-source-row:hover>td{background:#eef0ff!important;color:#282170}.global-source-row:focus-visible{outline:2px solid #5146d8;outline-offset:-2px}@media print{.global-source-row{cursor:default}.global-source-row:hover>td{background:inherit!important;color:inherit}}
+.print-financial-negative{color:#b91c1c!important;font-weight:800!important}
 .assembly-side-link,.financial-side-link{display:block;width:100%;text-align:left;padding:7px 9px!important;margin:2px 0;background:transparent!important;color:#bbf7d0!important;border-radius:7px!important;border:0!important;box-shadow:none!important;font-size:11px!important;font-weight:700!important}
 .assembly-side-link:hover,.assembly-side-link.active,.financial-side-link:hover,.financial-side-link.active{transform:none!important;background:rgba(255,255,255,.12)!important;color:#fff!important}
 .app-topbar{position:sticky;top:0;z-index:80;margin-left:var(--sidebar);padding:13px 24px;background:rgba(255,255,255,.96);color:#172033;box-shadow:0 2px 18px rgba(15,23,42,.08);display:flex;align-items:flex-start;justify-content:space-between;gap:18px;backdrop-filter:blur(12px)}
@@ -5763,7 +5764,7 @@ function exportExcel(){
     const accountDiff=calcNet!=null&&sourceNet!=null?calcNet-sourceNet:null;
     const closingDiff=opening!=null&&sourceNet!=null&&sourceClose!=null?(opening+sourceNet)-sourceClose:null;
     const ok=accountDiff!=null&&closingDiff!=null&&Math.abs(accountDiff)<.005&&Math.abs(closingDiff)<.005;
-    val.push([MONTHS[dashI],opening,calcNet,sourceNet,calcClose,sourceClose,accountDiff,closingDiff,ok?"BALANCED":"SOURCE NOT VERIFIED"]);
+    val.push([MONTHS[i],opening,calcNet,sourceNet,calcClose,sourceClose,accountDiff,closingDiff,ok?"BALANCED":"SOURCE NOT VERIFIED"]);
   }
   ws=XLSX.utils.aoa_to_sheet(val);
   ws["!merges"]=[{s:{r:0,c:0},e:{r:0,c:8}}]; ws.A1.s=titleStyle;
@@ -10200,17 +10201,27 @@ function clearFinancialData(){
   if(!confirm("Clear all Financial Summary imported data?"))return;
   financialState={months:{},pnlDetail:{},bsDetail:{}};saveFinancial();renderFinancial();
 }
+function financialPrintTableHtml(table){
+  const clone=table.cloneNode(true);
+  clone.querySelectorAll('td').forEach(td=>{
+    const raw=(td.textContent||'').trim();
+    if(/^[-−]\s*(?:Rs\.?\s*)?[\d,]+(?:\.\d+)?%?$/i.test(raw)){
+      td.textContent='('+raw.replace(/^[-−]\s*/,'')+')';td.classList.add('print-financial-negative');
+    }
+  });
+  return clone.outerHTML;
+}
 function printFinancialReport(tableId,title){
   const table=document.getElementById(tableId);
   if(!table || !table.innerHTML.trim()){alert(title+" data not available.");return;}
   const old=document.title;
   const area=document.createElement("div");
   area.id="tempPrintFinancial";
-  area.innerHTML="<h2 style=\"text-align:center;margin:0 0 10px;\">"+title+"</h2>"+table.outerHTML;
+  area.innerHTML="<h2 style=\"text-align:center;margin:0 0 10px;\">"+title+"</h2>"+financialPrintTableHtml(table);
   if(title.toLowerCase().includes("p&l")){
     const movement=document.getElementById("finProfitTable");
     if(movement && movement.innerHTML.trim()){
-      area.innerHTML += "<h3 style=\"text-align:center;margin:12px 0 6px;\">PROFIT / MOVEMENT DETAIL</h3>"+movement.outerHTML;
+      area.innerHTML += "<h3 style=\"text-align:center;margin:12px 0 6px;\">PROFIT / MOVEMENT DETAIL</h3>"+financialPrintTableHtml(movement);
     }
   }
   document.body.appendChild(area);
@@ -10451,9 +10462,9 @@ function printCombinedFinancialSummary(){
   div.id="tempFinancialCombinedPrint";
   div.innerHTML=
     '<h2 style="text-align:center;margin:0 0 5px;">FINANCIAL SUMMARY</h2>'+
-    '<h3>P & L SUMMARY</h3>'+pl.outerHTML+
-    '<h3>BALANCE SHEET SUMMARY / PROFIT RECONCILIATION</h3>'+bs.outerHTML+
-    '<h3>PROFIT / MOVEMENT DETAIL</h3>'+mv.outerHTML;
+    '<h3>P & L SUMMARY</h3>'+financialPrintTableHtml(pl)+
+    '<h3>BALANCE SHEET SUMMARY / PROFIT RECONCILIATION</h3>'+financialPrintTableHtml(bs)+
+    '<h3>PROFIT / MOVEMENT DETAIL</h3>'+financialPrintTableHtml(mv);
 
   document.body.appendChild(div);
   document.body.classList.add("print-combined-financial");
