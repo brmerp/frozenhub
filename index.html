@@ -4498,7 +4498,7 @@ html.brm-auth-restoring #erpLoginProgress{display:flex!important}
   </div>
 </div>
 
-<footer>Business Reporting Manager · Cash Flow + Sales + Financial Summary · Local browser storage</footer>
+<footer>Business Reporting Manager · Cash Flow + Sales + Financial Summary · <b>Build: Permissions Cloud v4</b></footer>
 
 <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js">
 
@@ -4749,6 +4749,7 @@ function applyCloudPayload(payload){
     'cc-sales-v1',
     'frozen-hub-inventory-v1',
     'qb_custom_locations',
+    'brm-user-access-v1',
     YEAR_LIST_STORE,
     'brm-global-product-master-v1',
     'brm-professional-settings-v1'
@@ -4835,7 +4836,7 @@ async function pullCloudNow(){
       applyCloudPayload(data.data);
       if(data.updated_at){
         lastCloudVersion=data.updated_at;
-        sessionStorage.setItem(`brm-cloud-version-${currentAppUser.id}`,data.updated_at);
+        localStorage.setItem(`brm-cloud-version-${currentAppUser.id}`,data.updated_at);
       }
       setCloudSyncStatus('ok','Cloud data loaded');
       location.reload();
@@ -4867,7 +4868,7 @@ async function pushCloudState(){
     if(error)throw error;
 
     lastCloudVersion=updatedAt;
-    sessionStorage.setItem(`brm-cloud-version-${currentAppUser.id}`,updatedAt);
+    localStorage.setItem(`brm-cloud-version-${currentAppUser.id}`,updatedAt);
     updateCloudLastSynced(updatedAt);
     setCloudSyncStatus('ok','Cloud saved');
     return true;
@@ -4892,7 +4893,7 @@ async function hydrateCloudState(userId){
       .upsert({id:'main',data:collectCloudPayload(),updated_at:updatedAt},{onConflict:'id'});
     if(saveError)throw saveError;
     lastCloudVersion=updatedAt;
-    sessionStorage.setItem(`brm-cloud-version-${userId}`,updatedAt);
+    localStorage.setItem(`brm-cloud-version-${userId}`,updatedAt);
     updateCloudLastSynced(updatedAt);
     setCloudSyncStatus('ok','Cloud initialized');
     return true;
@@ -4901,11 +4902,11 @@ async function hydrateCloudState(userId){
   lastCloudVersion=data.updated_at||'';
   updateCloudLastSynced(lastCloudVersion);
   const key=`brm-cloud-version-${userId}`;
-  const localVersion=sessionStorage.getItem(key);
+  const localVersion=localStorage.getItem(key);
 
   if(localVersion!==lastCloudVersion){
     applyCloudPayload(data.data);
-    sessionStorage.setItem(key,lastCloudVersion);
+    localStorage.setItem(key,lastCloudVersion);
     setCloudSyncStatus('ok','Latest cloud data loaded');
     location.reload();
     return false;
@@ -4928,11 +4929,17 @@ async function checkCloudUpdates(){
         setCloudSyncStatus('syncing','New cloud data found…');
         applyCloudPayload(data.data);
         lastCloudVersion=data.updated_at;
-        sessionStorage.setItem(`brm-cloud-version-${currentAppUser.id}`,data.updated_at);
+        localStorage.setItem(`brm-cloud-version-${currentAppUser.id}`,data.updated_at);
         setCloudSyncStatus('ok','Latest cloud data loaded');
-        try{sessionStorage.setItem('brm-year-switching-v1',String(ACTIVE_YEAR));}catch(e){}
-        setAuthBusy(true,'Refreshing cloud data…','Applying the latest synced reports.');
-        location.reload();
+        // Apply user access immediately without forcing the app back through
+        // the login/cloud-restore screen every time another user saves data.
+        if(typeof window.applyModuleVisibility==='function')window.applyModuleVisibility();
+        const active=document.querySelector('.erp-tab.active')?.dataset.erpModule||'home';
+        if(typeof canViewModule==='function'&&!canViewModule(active)){
+          const first=[...document.querySelectorAll('.erp-tab[data-erp-module]')]
+            .map(button=>button.dataset.erpModule).find(key=>canViewModule(key));
+          if(first&&typeof showModule==='function')showModule(first);
+        }else if(typeof window.applyEditState==='function')window.applyEditState(active);
         return;
       }
     }
@@ -10360,9 +10367,9 @@ window.addEventListener('DOMContentLoaded',()=>{
   }
   function defaultPerm(role){
     const p={};
-    MODULES.forEach(([k])=>p[k]={view:true,edit:role==='admin'});
-    p.inventory={view:role==='admin',edit:role==='admin'};
-    if(role!=='admin')p.settings={view:false,edit:false};
+    // Admin has full access. Staff starts with no reports and sees only the
+    // modules explicitly assigned by an Admin.
+    MODULES.forEach(([k])=>p[k]={view:role==='admin',edit:role==='admin'});
     return p;
   }
   function normalizePerm(p,role){
@@ -10386,7 +10393,7 @@ window.addEventListener('DOMContentLoaded',()=>{
   }
   window.canViewModule=function(which){
     if(currentAppUser?.role==='admin')return true;
-    return getUserPermissions(currentAppUser)?.[which]?.view!==false;
+    return getUserPermissions(currentAppUser)?.[which]?.view===true;
   };
   window.canEditModule=function(which){
     if(currentAppUser?.role==='admin')return true;
@@ -10420,7 +10427,27 @@ window.addEventListener('DOMContentLoaded',()=>{
       const key=b.dataset.erpModule;
       b.classList.toggle('permission-hidden',currentAppUser?.role!=='admin' && perm[key]?.view===false);
     });
+    if(currentAppUser?.role!=='admin'){
+      const sideIds={home:'homeTab',sales:'salesTab',inventory:'inventoryTab',assembly:'assemblyTab',forecast:'forecastTab',settings:'settingsTab'};
+      Object.entries(sideIds).forEach(([key,id])=>document.getElementById(id)?.classList.toggle('permission-hidden',perm[key]?.view!==true));
+
+      document.querySelectorAll('[data-financial-module]').forEach(button=>{
+        button.classList.toggle('permission-hidden',perm[button.dataset.financialModule]?.view!==true);
+      });
+      const financialAllowed=['financial','yearcompare','cash'].some(key=>perm[key]?.view===true);
+      document.getElementById('financialTab')?.classList.toggle('permission-hidden',!financialAllowed);
+      document.querySelector('.erp-menu[data-menu="financial"]')?.classList.toggle('permission-hidden',!financialAllowed);
+
+      const assemblyAllowed=perm.assembly?.view===true;
+      document.getElementById('assemblySideReports')?.classList.toggle('permission-hidden',!assemblyAllowed);
+      document.querySelector('.erp-menu[data-menu="assembly"]')?.classList.toggle('permission-hidden',!assemblyAllowed);
+    }else{
+      ['homeTab','salesTab','inventoryTab','financialTab','assemblyTab','forecastTab','settingsTab','financialSideReports','assemblySideReports']
+        .forEach(id=>document.getElementById(id)?.classList.remove('permission-hidden'));
+      document.querySelectorAll('.erp-menu,[data-financial-module]').forEach(el=>el.classList.remove('permission-hidden'));
+    }
   }
+  window.applyModuleVisibility=applyModuleVisibility;
   function isDataChangingElement(el){
     if(!el)return false;
     if(el.matches('input[type=file],input[type=number],input[type=text][data-editable],textarea,[contenteditable=true]'))return true;
@@ -10445,6 +10472,7 @@ window.addEventListener('DOMContentLoaded',()=>{
       });
     });
   }
+  window.applyEditState=applyEditState;
 
   // Capture edit attempts for dynamically-generated report fields.
   document.addEventListener('click',function(e){

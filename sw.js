@@ -1,4 +1,4 @@
-const CACHE = 'frozenhub-inventory-2026-09-30-v2';
+const CACHE = 'frozenhub-permissions-cloud-v4';
 const CORE = [
   './',
   './index.html',
