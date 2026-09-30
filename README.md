@@ -1,5 +1,5 @@
-# Frozen Hub GitHub Update
+# Frozen Hub
 
-Extract this ZIP. Upload ALL files directly into the frozenhub repository root: index.html, sw.js, manifest.webmanifest, icon-192.png, icon-512.png and README.md. Commit changes. After GitHub Pages deploys, refresh the website with Ctrl+F5. Click Install App when offered.
+GitHub Pages deployment package with the integrated **Frozen Hub Inventory** module.
 
-Keep both PNG icon files beside index.html. No icons subfolder is required for this version.
+Upload all extracted files and the `icons` folder to the repository root. Replace the existing files, commit the changes, wait for GitHub Pages deployment, then refresh the website with `Ctrl + F5`.
