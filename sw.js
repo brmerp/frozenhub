@@ -1,4 +1,4 @@
-const CACHE = 'frozenhub-login-permissions-v5';
+const CACHE = 'frozenhub-login-permissions-fuel-v6';
 const CORE = [
   './',
   './index.html',
