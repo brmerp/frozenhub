@@ -1,4 +1,4 @@
-const CACHE = 'frozenhub-cash-carry-fuel-v7';
+const CACHE = 'frozenhub-formula-excel-profit-v13';
 const CORE = [
   './',
   './index.html',
