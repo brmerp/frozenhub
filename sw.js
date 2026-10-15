@@ -1,4 +1,4 @@
-const CACHE = 'frozenhub-formula-excel-profit-v13';
+const CACHE = 'frozenhub-excel-library-fix-v17';
 const CORE = [
   './',
   './index.html',
