@@ -1,4 +1,4 @@
-const CACHE = 'frozenhub-cost-efficiency-comparison-v19';
+const CACHE = 'frozenhub-professional-potato-excel-v28';
 const CORE = [
   './',
   './index.html',

@@ -345,11 +345,12 @@ body{min-height:100vh;background:#f3f6fa}
 .app-sidebar .module-tab.active .nav-icon{background:#dcfce7}.app-sidebar .module-tab b{display:block;font-size:13px}.app-sidebar .module-tab small{display:block;margin-top:3px;font-size:10px;font-weight:600;opacity:.67}
 .sidebar-status{margin-top:auto;padding:12px 10px;border-top:1px solid rgba(255,255,255,.13);font-size:11px;color:#bbf7d0}.sidebar-status span{display:inline-block;width:8px;height:8px;background:#4ade80;border-radius:50%;margin-right:7px;box-shadow:0 0 0 4px rgba(74,222,128,.13)}
 .sidebar-collapse-btn{margin-left:auto;width:28px;height:28px;padding:0!important;border-radius:8px!important;background:rgba(255,255,255,.12)!important;color:#fff!important;border:1px solid rgba(255,255,255,.18)!important;box-shadow:none!important;font-size:20px;display:grid;place-items:center}
-.assembly-side-reports,.financial-side-reports{display:none;margin:2px 0 5px 44px;padding:4px 0 4px 10px;border-left:1px solid rgba(255,255,255,.2)}
+.assembly-side-reports,.financial-side-reports,.sales-side-reports{display:none;margin:2px 0 5px 44px;padding:4px 0 4px 10px;border-left:1px solid rgba(255,255,255,.2)}
 body.assembly-active .assembly-side-reports{display:block}
 body.financial-active .financial-side-reports{display:block}
-.assembly-side-link,.financial-side-link{display:block;width:100%;text-align:left;padding:7px 9px!important;margin:2px 0;background:transparent!important;color:#bbf7d0!important;border-radius:7px!important;border:0!important;box-shadow:none!important;font-size:11px!important;font-weight:700!important}
-.assembly-side-link:hover,.assembly-side-link.active,.financial-side-link:hover,.financial-side-link.active{transform:none!important;background:rgba(255,255,255,.12)!important;color:#fff!important}
+body.sales-active .sales-side-reports{display:block}
+.assembly-side-link,.financial-side-link,.sales-side-link{display:block;width:100%;text-align:left;padding:7px 9px!important;margin:2px 0;background:transparent!important;color:#bbf7d0!important;border-radius:7px!important;border:0!important;box-shadow:none!important;font-size:11px!important;font-weight:700!important}
+.assembly-side-link:hover,.assembly-side-link.active,.financial-side-link:hover,.financial-side-link.active,.sales-side-link:hover,.sales-side-link.active{transform:none!important;background:rgba(255,255,255,.12)!important;color:#fff!important}
 .app-topbar{position:sticky;top:0;z-index:80;margin-left:var(--sidebar);padding:13px 24px;background:rgba(255,255,255,.96);color:#172033;box-shadow:0 2px 18px rgba(15,23,42,.08);display:flex;align-items:flex-start;justify-content:space-between;gap:18px;backdrop-filter:blur(12px)}
 .topbar-heading{display:flex;align-items:center;gap:12px;min-width:210px;padding-top:5px}.topbar-heading h1{font-size:20px;color:#0f172a}.topbar-heading .sub{color:#64748b;margin:3px 0 0;font-size:11px;opacity:1}
 .sidebar-toggle{display:inline-flex;padding:8px 10px;background:#e2e8f0;box-shadow:none}.topbar-actions{display:flex;justify-content:flex-end;flex:1}.app-topbar .module-tools{justify-content:flex-end;margin-top:0!important}.app-topbar button,.app-topbar .upload{padding:8px 11px;font-size:11px;border:1px solid #dbe3ee;background:#fff}.app-topbar .primary{border-color:#15803d}
@@ -1953,7 +1954,8 @@ body.brm-theme-dark #potatoYieldTable th{background:#263244;color:#eef2f7}
 
 /* Submenus: closed by default, open automatically with active parent module. */
 .app-sidebar .assembly-side-reports,
-.app-sidebar .financial-side-reports{
+.app-sidebar .financial-side-reports,
+.app-sidebar .sales-side-reports{
   display:none!important;
   margin:2px 0 6px 44px!important;
   padding:4px 0 4px 10px!important;
@@ -1964,6 +1966,9 @@ body.assembly-active .app-sidebar .assembly-side-reports{
   display:block!important;
 }
 body.financial-active .app-sidebar .financial-side-reports{
+  display:block!important;
+}
+body.sales-active .app-sidebar .sales-side-reports{
   display:block!important;
 }
 @keyframes sidebarSubmenuIn{
@@ -1987,12 +1992,12 @@ body.financial-active .app-sidebar .financial-side-reports{
 }
 
 /* Cleaner sub-links */
-.assembly-side-link,.financial-side-link{
+.assembly-side-link,.financial-side-link,.sales-side-link{
   position:relative;
   padding:7px 9px 7px 11px!important;
   transition:background .15s ease,color .15s ease,padding .15s ease;
 }
-.assembly-side-link.active::before,.financial-side-link.active::before{
+.assembly-side-link.active::before,.financial-side-link.active::before,.sales-side-link.active::before{
   content:'';
   position:absolute;
   left:-11px;
@@ -2005,7 +2010,8 @@ body.financial-active .app-sidebar .financial-side-reports{
 
 /* Collapsed sidebar: submenus stay hidden and bottom Settings becomes icon-only. */
 body.sidebar-collapsed .app-sidebar .assembly-side-reports,
-body.sidebar-collapsed .app-sidebar .financial-side-reports{
+body.sidebar-collapsed .app-sidebar .financial-side-reports,
+body.sidebar-collapsed .app-sidebar .sales-side-reports{
   display:none!important;
 }
 body.sidebar-collapsed .sidebar-settings-tab{
@@ -2890,8 +2896,8 @@ body{--sidebar:var(--erp-sidebar)!important;background:var(--erp-surface)!import
 }
 .app-sidebar .module-tab .nav-icon{width:29px!important;height:29px!important;border-radius:7px!important;font-size:14px!important}
 .app-sidebar .module-tab b{font-size:12px!important}.app-sidebar .module-tab small{font-size:9px!important}
-.financial-side-reports,.assembly-side-reports{margin-left:35px!important}
-.financial-side-link,.assembly-side-link{font-size:10px!important;color:#bfd6ea!important;padding:6px 8px!important}
+.financial-side-reports,.assembly-side-reports,.sales-side-reports{margin-left:35px!important}
+.financial-side-link,.assembly-side-link,.sales-side-link{font-size:10px!important;color:#bfd6ea!important;padding:6px 8px!important}
 .sidebar-user{margin-top:auto!important}
 .sidebar-status{color:#bfe5d0!important}
 
@@ -3714,7 +3720,12 @@ html.brm-auth-restoring #erpLoginProgress{display:flex!important}
   <div class="sidebar-year-manager"><label>REPORT YEAR</label><select id="reportYearSelect" onchange="switchReportYear(this.value)"></select><button onclick="addReportYear()">＋ Add</button></div>
   <nav class="module-tabs">
     <button id="homeTab" class="module-tab active" onclick="showModule('home')"><span class="nav-icon">⌂</span><span><b>Home Dashboard</b><small>Business performance overview</small></span></button>
-    <button id="salesTab" class="module-tab" onclick="showModule('sales')"><span class="nav-icon">📦</span><span><b>Sales &amp; Production</b><small>Sales and production cost</small></span></button>
+    <button id="salesTab" class="module-tab has-submenu" onclick="showModule('sales')"><span class="nav-icon">📦</span><span><b>Sales &amp; Production</b><small>Sales and production cost</small></span><span class="submenu-chevron">›</span></button>
+    <div id="salesSideReports" class="sales-side-reports" aria-hidden="true">
+      <button class="sales-side-link active" data-side-sales-report="items" onclick="showSalesReport('items')">Item Sales Report</button>
+      <button class="sales-side-link" data-side-sales-report="summary" onclick="showSalesReport('summary')">Sales &amp; Production Summary</button>
+      <button class="sales-side-link" data-side-sales-report="potato" onclick="showSalesReport('potato')">Potato Purchase &amp; Rates</button>
+    </div>
     <button id="inventoryTab" class="module-tab" data-erp-module="inventory" onclick="showModule('inventory')"><span class="nav-icon">▤</span><span><b>Frozen Hub Inventory</b><small>Location and item reconciliation</small></span></button>
     <button id="financialTab" class="module-tab has-submenu" onclick="showModule('financial')"><span class="nav-icon">📊</span><span class="module-tab-copy"><b>Financial Reports</b><small>Cash Flow, P&amp;L and Balance Sheet</small></span><span class="submenu-chevron">›</span></button>
     <div id="financialSideReports" class="financial-side-reports" aria-hidden="true">
@@ -3803,7 +3814,16 @@ html.brm-auth-restoring #erpLoginProgress{display:flex!important}
   <div class="erp-tabs" role="tablist" aria-label="ERP Modules">
     <button class="erp-tab active" data-erp-module="home" onclick="showModule('home')">⌂ Dashboard</button>
     <button class="erp-tab" data-erp-module="cashcarry" onclick="showModule('cashcarry')">▦ Cash &amp; Carry Sales</button>
-    <button class="erp-tab" data-erp-module="sales" onclick="showModule('sales')">▣ Sales &amp; Production</button>
+    <div class="erp-menu" data-menu="sales">
+      <button class="erp-tab erp-menu-trigger" data-erp-module="sales" onclick="showModule('sales')" aria-haspopup="true">
+        ▣ Sales &amp; Production <span class="erp-caret">▾</span>
+      </button>
+      <div class="erp-dropdown" role="menu">
+        <button type="button" data-sales-sub="items" onclick="showSalesReport('items')"><b>Item Sales Report</b><small>Month-wise item sales</small></button>
+        <button type="button" data-sales-sub="summary" onclick="showSalesReport('summary')"><b>Sales &amp; Production Summary</b><small>Sale, production cost and margin</small></button>
+        <button type="button" data-sales-sub="potato" onclick="showSalesReport('potato')"><b>Potato Purchase &amp; Rates</b><small>Month-wise quantity, amount and average rate</small></button>
+      </div>
+    </div>
     <button class="erp-tab" data-erp-module="inventory" onclick="showModule('inventory')">▤ Inventory</button>
 
     <div class="erp-menu" data-menu="financial">
@@ -4284,7 +4304,7 @@ html.brm-auth-restoring #erpLoginProgress{display:flex!important}
 <div id="salesModule" class="module">
 <div id="salesImportStatus" class="note"><b>Sales data storage preserved.</b> Same browser storage key is being used, so previously imported/manual Sales data remains available when opened from the same browser storage context. <b>Book2.xlsx starting data is also included.</b> Import the same monthly Sales Summary format; detected months replace only those months.</div>
 <div class="sales-grid" id="salesDashboard"></div>
-<div class="section">
+<div class="section" id="salesItemReportSection">
   <div class="bar">
     <h2>MONTH-WISE ITEM SALES REPORT</h2>
     <div class="sales-controls">
@@ -4296,7 +4316,7 @@ html.brm-auth-restoring #erpLoginProgress{display:flex!important}
   <div class="sales-help"><b>Excel fields:</b> Item-wise <b>Sale Qty, Sale Value and Avg Price</b> are imported from the Assembly section. <b>Sales Tax 18%</b> is shown below as a LESS / minus amount.</div>
   <div class="wrap"><table id="salesTable"></table>
 </div></div>
-<div class="section"><div class="bar"><h2>MONTH-WISE SALES & PRODUCTION SUMMARY</h2><button onclick="printSalesProductionSummary()">🖨 Print Summary</button></div><div class="sales-help"><b>Automatic Assembly link:</b> Production CTN is linked automatically from monthly Assembly quantity. Production Cost = <b>Base Assembly Cost + Grocery + In Ward Freight + allocated expenses + Government Tax</b>. Allocated expenses use the same reconciled monthly source as the Finished Goods month-wise comparison. Only CTN Packing Qty remains a manual input.</div><div class="wrap"><table id="salesSummaryTable"></table></div>
+<div class="section" id="salesProductionSummarySection"><div class="bar"><h2>MONTH-WISE SALES & PRODUCTION SUMMARY</h2><button onclick="printSalesProductionSummary()">🖨 Print Summary</button></div><div class="sales-help"><b>Automatic Assembly link:</b> Production CTN is linked automatically from monthly Assembly quantity. Production Cost = <b>Base Assembly Cost + Grocery + In Ward Freight + allocated expenses + Government Tax</b>. Allocated expenses use the same reconciled monthly source as the Finished Goods month-wise comparison. Only CTN Packing Qty remains a manual input.</div><div class="wrap"><table id="salesSummaryTable"></table></div>
 <div id="salesItemMonthSummarySection" class="sales-item-month-summary-section">
   <div class="sales-item-summary-head">
     <div>
@@ -4310,6 +4330,11 @@ html.brm-auth-restoring #erpLoginProgress{display:flex!important}
   </div>
   <div id="salesItemMonthSummaryGrid" class="sales-item-month-summary-table-container"></div>
 </div></div>
+<div class="section" id="salesPotatoReportSection">
+  <div class="bar"><h2>RAW POTATO — MONTH-WISE PURCHASE / CONSUMPTION &amp; RATES</h2><div class="report-actions"><select id="salesPotatoMonthFilter" onchange="renderSalesPotatoReport()"><option value="all">All Months</option></select><button onclick="printSalesPotatoReport()">🖨 Print</button><button onclick="exportSalesPotatoReport()">⬇ Export Excel</button></div></div>
+  <div class="sales-help">This report uses Assembly <b>Material Used / Consumption</b> data as the purchase basis and shows it item-wise and month-wise. Average Rate = Amount ÷ Quantity KG.</div>
+  <div class="wrap"><table id="salesPotatoReportTable"></table></div>
+</div>
 </div>
 </div>
 
@@ -4519,7 +4544,12 @@ html.brm-auth-restoring #erpLoginProgress{display:flex!important}
   </div>
 </div>
 
-<footer>Business Reporting Manager · Cash Flow + Sales + Financial Summary · <b>Build: Cost Efficiency Comparison v19</b></footer>
+<style id="sales-potato-grouped-style">
+#salesPotatoReportTable .potato-item-heading td{background:#1f4e78!important;color:#fff!important;font-weight:900!important;text-align:left!important;font-size:12px!important}
+#salesPotatoReportTable .potato-item-total td{background:#eaf2f8!important;color:#173653!important;font-weight:900!important;border-top:2px solid #9db5cc!important}
+#salesPotatoReportTable .sales-total td{background:#e2f0d9!important;font-weight:900!important;border-top:2px solid #70ad47!important}
+</style>
+<footer>Business Reporting Manager · Cash Flow + Sales + Financial Summary · <b>Build: Professional Potato Excel v28</b></footer>
 
 <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js">
 
@@ -5805,7 +5835,7 @@ document.getElementById("restoreDataFile")?.addEventListener("change",async e=>{
  try{
   const p=JSON.parse(await f.text()),stores={};
   if(p.stores&&typeof p.stores==='object'){for(const [key,value]of Object.entries(p.stores))stores[key]=typeof value==='string'?value:JSON.stringify(value)}
-  else{if(p.cashFlow)stores[STORE]=JSON.stringify(p.cashFlow);if(p.sales)stores['sales-itemwise-summary-v3']=JSON.stringify(p.sales);if(p.assembly||p.assemblyState)stores['assembly-material-report-v1']=JSON.stringify(p.assembly||p.assemblyState);if(p.financial||p.financialState)stores['financial-summary-2026-v1']=JSON.stringify(p.financial||p.financialState)}
+  else{if(p.cashFlow)stores[STORE]=JSON.stringify(p.cashFlow);if(p.sales)stores['sales-itemwise-summary-v3']=JSON.stringify(p.sales);if(p.assembly||p.assemblyState)stores['assembly-material-report-v1']=JSON.stringify(p.assembly||p.assemblyState);if(p.financial||p.financialState)stores['financial-summary-2026-v1']=JSON.stringify(p.financial||p.financialState);if(Array.isArray(p.rows)&&p.cfg)stores['cc-sales-v1']=JSON.stringify(p)}
   if(!Object.keys(stores).length)throw new Error('This file does not contain recognized ERP backup stores.');
   const year=Number(p.activeYear||p.active_year||stores[ACTIVE_YEAR_STORE]||ACTIVE_YEAR);
   if(!Number.isInteger(year)||year<2000||year>2100)throw new Error('Invalid backup year');
@@ -5813,7 +5843,18 @@ document.getElementById("restoreDataFile")?.addEventListener("change",async e=>{
   for(const base of BASE_REPORT_STORES){const archive=yearStoreKey(year,base),direct=stores[base],saved=stores[archive];if(direct!==undefined&&(saved===undefined||score(direct,base)>0&&score(saved,base)===0))stores[archive]=direct;else if(saved!==undefined)stores[base]=saved}
   stores[ACTIVE_YEAR_STORE]=String(year);
   for(const [key,value]of Object.entries(stores))localStorage.setItem(key,value);
-  alert('Backup restored for '+year+'. The software will reload.');location.reload();
+  let carryInfo='';
+  if(stores['cc-sales-v1']){
+   const carry=JSON.parse(stores['cc-sales-v1']);
+   if(!Array.isArray(carry.rows)||!carry.cfg)throw new Error('Cash & Carry data in this backup is invalid.');
+   carry.lines=Array.isArray(carry.lines)?carry.lines:[];
+   carry.salaries=carry.salaries||{};carry.fuels=carry.fuels||{};carry.fuelMonthly=carry.fuelMonthly||{};
+   localStorage.setItem('cc-sales-v1',JSON.stringify(carry));
+   sessionStorage.setItem('brm-cashcarry-restore-view','1');
+   carryInfo=' Cash & Carry restored: '+carry.rows.length+' sales rows, '+carry.lines.length+' item lines.';
+  }
+  sessionStorage.setItem('brm-full-backup-restored','1');
+  alert('Backup restored for '+year+'.'+carryInfo+' The software will reload.');location.reload();
  }catch(err){console.error(err);alert('Backup restore failed: '+err.message)}
 });
 
@@ -7686,6 +7727,76 @@ function exportYearComparisonExcel(){
   const info=XLSX.utils.aoa_to_sheet([['YEAR COMPARISON EXPORT'],['Period',periodLabel],['Years',years.join(', ')],['Generated',new Date().toLocaleString()],[],['Sheets'],['Year Summary','Overall metrics and percentages'],['Production by Item','Production CTN, Final CTN Cost and Per KG Cost'],['Monthly Trend','Sales, Sale Qty, Avg Sale Price, Production, Avg CTN Cost and Net Income'],['Item Trend YYYY','One formatted Jan–Dec item sheet per selected year']]);info['!cols']=[{wch:24},{wch:70}];info['!merges']=[{s:{r:0,c:0},e:{r:0,c:1}}];['A1','B1'].forEach(a=>{if(info[a])info[a].s={fill:{fgColor:{rgb:headerFill}},font:{bold:true,color:{rgb:'FFFFFF'},sz:14},alignment:{horizontal:'center'}};});XLSX.utils.book_append_sheet(wb,info,'Export Info');
   XLSX.writeFile(wb,`Year_Comparison_${years.join('_')||'Years'}.xlsx`);
 }
+function salesPotatoPurchaseRows(){
+  const rows=[];
+  for(const r of assemblyState?.records||[]){
+    for(const m of r.materials||[]){
+      const name=String(m.name||m.item||'').trim(),norm=name.toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
+      if(!/^raw\s+(?:sweet\s+)?potato\b/.test(norm))continue;
+      const month=String(r.month||''),qty=Number(m.qty||0),amount=Number(m.amount||0);
+      let x=rows.find(z=>z.month===month&&z.name===name);
+      if(!x){x={month,name,qty:0,amount:0};rows.push(x)}
+      x.qty+=qty;x.amount+=amount;
+    }
+  }
+  const rank=n=>{const x=n.toLowerCase();return x==='raw potato'?0:x.includes('alverstone')?1:x.includes('sweet')?2:3};
+  return rows.sort((a,b)=>rank(a.name)-rank(b.name)||a.name.localeCompare(b.name)||a.month.localeCompare(b.month));
+}
+function renderSalesPotatoReport(){
+  const table=document.getElementById('salesPotatoReportTable');if(!table)return;
+  const allRows=salesPotatoPurchaseRows(),label=m=>{const [y,n]=String(m).split('-'),names=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];return names[Number(n)-1]?(names[Number(n)-1]+'-'+String(y).slice(-2)):m},filter=document.getElementById('salesPotatoMonthFilter');
+  if(filter){const selected=filter.value||'all',months=[...new Set(allRows.map(x=>x.month))].sort();filter.innerHTML='<option value="all">All Months</option>'+months.map(m=>`<option value="${m}">${label(m)}</option>`).join('');filter.value=months.includes(selected)||selected==='all'?selected:'all'}
+  const selectedMonth=filter?.value||'all',rows=selectedMonth==='all'?allRows:allRows.filter(x=>x.month===selectedMonth);
+  let grandQty=0,grandAmount=0,h='<thead><tr><th>Month</th><th>Purchase / Consumption Qty KG</th><th>Amount</th><th>Average Price / KG</th></tr></thead><tbody>';
+  const items=[...new Set(rows.map(x=>x.name))];
+  for(const item of items){const itemRows=rows.filter(x=>x.name===item);let iq=0,ia=0;h+=`<tr class="potato-item-heading"><td colspan="4">${escapeHtml(item)}</td></tr>`;for(const x of itemRows){iq+=x.qty;ia+=x.amount;grandQty+=x.qty;grandAmount+=x.amount;h+=`<tr><td>${label(x.month)}</td><td class="num">${money(x.qty)}</td><td class="num">${money(x.amount)}</td><td class="num">${x.qty?money(x.amount/x.qty):'—'}</td></tr>`}h+=`<tr class="potato-item-total"><td>${escapeHtml(item)} — TOTAL / WEIGHTED AVG</td><td class="num">${money(iq)}</td><td class="num">${money(ia)}</td><td class="num">${iq?money(ia/iq):'—'}</td></tr>`}
+  h+=rows.length?`<tr class="sales-total"><td>ALL ITEMS TOTAL / WEIGHTED AVERAGE${selectedMonth==='all'?'':' — '+label(selectedMonth)}</td><td class="num">${money(grandQty)}</td><td class="num">${money(grandAmount)}</td><td class="num">${grandQty?money(grandAmount/grandQty):'—'}</td></tr>`:'<tr><td colspan="4">No Raw Potato material-used data available for the selected month.</td></tr>';
+  table.innerHTML=h+'</tbody>';
+}
+function printSalesPotatoReport(){
+  renderSalesPotatoReport();const table=document.getElementById('salesPotatoReportTable');if(!table)return;
+  const w=window.open('','_blank','width=1200,height=800');if(!w)return alert('Please allow pop-ups to print.');
+  w.document.write('<!doctype html><html><head><title>Potato Purchase & Rates</title><style>@page{size:A4 landscape;margin:10mm}body{font-family:Arial}h1{font-size:18px}table{width:100%;border-collapse:collapse}th,td{border:1px solid #888;padding:7px;font-size:11px}th{background:#d1fae5}.num{text-align:right}.potato-item-heading{font-weight:bold;background:#1f4e78;color:#fff}.potato-item-total{font-weight:bold;background:#eaf2f8}.sales-total{font-weight:bold;background:#e2f0d9}</style></head><body><h1>RAW POTATO — ITEM-WISE & MONTH-WISE PURCHASE / CONSUMPTION RATES</h1>'+table.outerHTML+'</body></html>');w.document.close();w.onload=()=>w.print();
+}
+async function exportSalesPotatoReport(){
+  renderSalesPotatoReport();if(typeof ExcelJS==='undefined')return alert('Excel export library is not loaded. Refresh and try again.');
+  try{
+    const all=salesPotatoPurchaseRows(),filter=document.getElementById('salesPotatoMonthFilter'),selected=filter?.value||'all',rows=selected==='all'?all:all.filter(x=>x.month===selected),monthText=filter?.selectedOptions?.[0]?.textContent||'All Months';
+    if(!rows.length)return alert('No Raw Potato data is available for the selected month.');
+    const wb=new ExcelJS.Workbook();wb.creator='Frozen Hub';wb.created=new Date();wb.calculation={fullCalcOnLoad:true,forceFullCalc:true,calcMode:'auto'};
+    const ws=wb.addWorksheet('Potato Item Rates',{views:[{state:'frozen',ySplit:5}]});ws.properties.defaultRowHeight=19;ws.showGridLines=false;
+    ws.mergeCells('A1:D1');ws.getCell('A1').value='RAW POTATO — ITEM-WISE AND MONTH-WISE PURCHASE / CONSUMPTION RATES';
+    ws.mergeCells('A2:D2');ws.getCell('A2').value='Period: '+monthText;
+    ws.mergeCells('A3:D3');ws.getCell('A3').value='Source: Assembly Material Used / Consumption | Average Rate = Amount ÷ Quantity KG';
+    const title=ws.getCell('A1');title.font={name:'Arial',size:15,bold:true,color:{argb:'FFFFFFFF'}};title.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FF1F4E78'}};title.alignment={horizontal:'left',vertical:'middle'};ws.getRow(1).height=28;
+    ws.getCell('A2').font={name:'Arial',size:10,bold:true,color:{argb:'FF1F4E78'}};ws.getCell('A3').font={name:'Arial',size:9,italic:true,color:{argb:'FF667085'}};
+    const header=ws.getRow(5);header.values=['Month','Purchase / Consumption Qty KG','Amount','Average Price / KG'];header.height=27;header.eachCell(c=>{c.font={name:'Arial',size:10,bold:true,color:{argb:'FFFFFFFF'}};c.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FF4472C4'}};c.alignment={horizontal:'center',vertical:'middle',wrapText:true};c.border={top:{style:'thin',color:{argb:'FFB4C6E7'}},bottom:{style:'thin',color:{argb:'FFB4C6E7'}},left:{style:'thin',color:{argb:'FFB4C6E7'}},right:{style:'thin',color:{argb:'FFB4C6E7'}}}});
+    const monthLabel=m=>{const [y,n]=String(m).split('-'),names=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];return names[Number(n)-1]?(names[Number(n)-1]+'-'+String(y).slice(-2)):m};
+    let rowNo=6;const itemTotalRows=[];
+    for(const item of [...new Set(rows.map(x=>x.name))]){
+      ws.mergeCells(rowNo,1,rowNo,4);const band=ws.getCell(rowNo,1);band.value=item;band.font={name:'Arial',size:11,bold:true,color:{argb:'FFFFFFFF'}};band.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FF1F4E78'}};band.alignment={horizontal:'left',vertical:'middle'};ws.getRow(rowNo).height=23;rowNo++;
+      const start=rowNo;
+      for(const x of rows.filter(z=>z.name===item)){
+        const r=ws.getRow(rowNo);r.values=[monthLabel(x.month),Number(x.qty||0),Number(x.amount||0),{formula:`IFERROR(C${rowNo}/B${rowNo},0)`,result:x.qty?x.amount/x.qty:0}];r.eachCell((c,col)=>{c.font={name:'Arial',size:10};c.alignment={horizontal:col===1?'left':'right',vertical:'middle'};c.border={bottom:{style:'hair',color:{argb:'FFD9E2F3'}}};if(rowNo%2===0)c.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFF7F9FC'}}});rowNo++;
+      }
+      const end=rowNo-1,total=rowNo;itemTotalRows.push(total);const tr=ws.getRow(total);tr.values=[item+' — TOTAL / WEIGHTED AVERAGE',{formula:`SUM(B${start}:B${end})`},{formula:`SUM(C${start}:C${end})`},{formula:`IFERROR(C${total}/B${total},0)`}];tr.eachCell((c,col)=>{c.font={name:'Arial',size:10,bold:true,color:{argb:'FF173653'}};c.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFEAF2F8'}};c.alignment={horizontal:col===1?'left':'right',vertical:'middle'};c.border={top:{style:'medium',color:{argb:'FF9DB5CC'}},bottom:{style:'thin',color:{argb:'FF9DB5CC'}}}});rowNo+=2;
+    }
+    const grand=rowNo;const gr=ws.getRow(grand),sumRows=(col)=>itemTotalRows.map(r=>`${col}${r}`).join('+')||'0';gr.values=['ALL ITEMS TOTAL / WEIGHTED AVERAGE — '+monthText,{formula:sumRows('B')},{formula:sumRows('C')},{formula:`IFERROR(C${grand}/B${grand},0)`}];gr.height=24;gr.eachCell((c,col)=>{c.font={name:'Arial',size:10,bold:true,color:{argb:'FF375623'}};c.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFE2F0D9'}};c.alignment={horizontal:col===1?'left':'right',vertical:'middle'};c.border={top:{style:'medium',color:{argb:'FF70AD47'}},bottom:{style:'medium',color:{argb:'FF70AD47'}}}});
+    ws.getColumn(1).width=42;ws.getColumn(2).width=28;ws.getColumn(3).width=22;ws.getColumn(4).width=24;
+    ws.getColumn(2).numFmt='#,##0.00;[Red](#,##0.00);-';ws.getColumn(3).numFmt='#,##0.00;[Red](#,##0.00);-';ws.getColumn(4).numFmt='#,##0.00;[Red](#,##0.00);-';
+    ws.autoFilter={from:'A5',to:'D5'};ws.pageSetup={orientation:'landscape',fitToPage:true,fitToWidth:1,fitToHeight:0,paperSize:9,margins:{left:.3,right:.3,top:.5,bottom:.5,header:.2,footer:.2}};ws.headerFooter.oddHeader='&BRaw Potato Item Rates — '+monthText;ws.headerFooter.oddFooter='Frozen Hub &RPage &P of &N';ws.pageSetup.printTitlesRow='1:5';
+    const buffer=await wb.xlsx.writeBuffer();saveAs(new Blob([buffer],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}),'Raw_Potato_Item_Wise_Month_Wise_Rates_'+(selected==='all'?'All_Months':selected)+'.xlsx');
+  }catch(e){console.error(e);alert('Excel export failed: '+e.message)}
+}
+function showSalesReport(name){
+  if(currentAppUser&&!canViewReport('sales',name))return alert('This report is not assigned to your user.');
+  showModule('sales');
+  document.querySelectorAll('.sales-side-link').forEach(x=>x.classList.toggle('active',x.dataset.sideSalesReport===name));
+  const targets={items:'salesItemReportSection',summary:'salesProductionSummarySection',potato:'salesPotatoReportSection'},target=document.getElementById(targets[name]||targets.items);
+  if(name==='summary')renderSales();if(name==='potato')renderSalesPotatoReport();
+  setTimeout(()=>target?.scrollIntoView({behavior:'smooth',block:'start'}),60);
+  const sub=document.getElementById('currentModuleSub');if(sub)sub.textContent=name==='summary'?'Month-wise sales and production summary':name==='potato'?'Month-wise raw potato quantity, amount and average rate':'Month-wise item sales report';
+}
 function showModule(which){
   const cashcarry=which==='cashcarry',inventory=which==='inventory',home=which==='home',cash=which==='cash',sales=which==='sales',financial=which==='financial',yearcompare=which==='yearcompare',assembly=which==='assembly',settings=which==='settings',forecast=which==='forecast';
   document.getElementById('cashCarryModule')?.classList.toggle('active',cashcarry);
@@ -7707,11 +7818,13 @@ function showModule(which){
   document.getElementById('forecastTab')?.classList.toggle('active',forecast);
   document.body.classList.toggle('assembly-active',assembly);
   document.body.classList.toggle('financial-active',financial||cash||yearcompare);
+  document.body.classList.toggle('sales-active',sales);
   document.body.classList.toggle('home-active',home);
   // Sidebar submenus follow the selected main module automatically.
   // No manual expand/collapse interaction is required.
   document.getElementById('financialSideReports')?.setAttribute('aria-hidden',String(!(financial||cash||yearcompare)));
   document.getElementById('assemblySideReports')?.setAttribute('aria-hidden',String(!assembly));
+  document.getElementById('salesSideReports')?.setAttribute('aria-hidden',String(!sales));
   document.querySelectorAll('.financial-side-link').forEach(x=>x.classList.toggle('active',x.dataset.financialModule===which));
   document.getElementById('cashTools')?.classList.toggle('hidden',!cash);
   document.getElementById('salesTools')?.classList.toggle('hidden',!sales);
@@ -8387,6 +8500,7 @@ function renderSales(){
 
 
   renderSalesItemMonthSummary();
+  renderSalesPotatoReport();
 }
 function salesMonthIndexFromText(v){
   const s=String(v||'').toLowerCase(),names=['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
@@ -10387,7 +10501,7 @@ window.addEventListener('DOMContentLoaded',()=>{
     ['settings','Settings','Company, backup, cloud and user settings']
   ];
   const REPORTS=[["assembly:overview", "Assembly \u2014 Overview", "Individual assembly report"], ["assembly:finished", "Assembly \u2014 Finished Goods Cost/KG", "Individual assembly report"], ["assembly:materials", "Assembly \u2014 Material Summary", "Individual assembly report"], ["assembly:comparison", "Assembly \u2014 Month Comparison", "Individual assembly report"], ["assembly:yield", "Assembly \u2014 Potato Yield", "Individual assembly report"], ["assembly:detail", "Assembly \u2014 Assembly Detail", "Individual assembly report"], ["cashcarry:cash", "Cash & Carry \u2014 Sales Summary", "Individual Cash & Carry report"], ["cashcarry:items", "Cash & Carry \u2014 Item-wise Sales", "Individual Cash & Carry report"], ["cashcarry:comparison:summary", "Cash & Carry \u2014 Month Comparison Summary", "Individual Cash & Carry report"], ["cashcarry:comparison:detail", "Cash & Carry \u2014 Detail Expense Breakdown", "Individual Cash & Carry report"], ["cashcarry:costs", "Cash & Carry \u2014 Cost Working / Mapping", "Individual Cash & Carry report"], ["cashcarry:salaries", "Cash & Carry \u2014 Salary Settings", "Individual Cash & Carry report"], ["cashcarry:settings", "Cash & Carry \u2014 Tax Settings", "Individual Cash & Carry report"], ["cashcarry:other", "Cash & Carry \u2014 Other Sales", "Individual Cash & Carry report"], ["cashcarry:all", "Cash & Carry \u2014 All Sales / Mapping", "Individual Cash & Carry report"]];MODULES.push(...REPORTS);
-  REPORTS.splice(4,0,['assembly:salesproduction','Assembly — Sales & Production Summary','Individual assembly report']);MODULES.push(REPORTS[4]);
+  REPORTS.unshift(['sales:items','Sales & Production — Item Sales Report','Individual Sales report'],['sales:summary','Sales & Production — Month Summary','Individual Sales & Production report'],['sales:potato','Sales & Production — Potato Purchase & Rates','Raw Potato month-wise quantity, amount and average rate']);MODULES.push(REPORTS[0],REPORTS[1],REPORTS[2]);
   let managedUserCache=[];
 
   function store(){try{return JSON.parse(localStorage.getItem(ACCESS_STORE)||'{}')}catch{return{}}}
@@ -10829,6 +10943,14 @@ window.addEventListener('DOMContentLoaded',()=>{
   const isMobile=()=>mq.matches;
 
   const menus={
+    sales:{
+      title:'Sales & Production Reports',
+      items:[
+        ['Item Sales Report','Month-wise item sales',()=>showSalesReport('items')],
+        ['Sales & Production Summary','Sale, production cost and margin',()=>showSalesReport('summary')],
+        ['Potato Purchase & Rates','Month-wise quantity, amount and average rate',()=>showSalesReport('potato')]
+      ]
+    },
     financial:{
       title:'Financial Reports',
       items:[
@@ -10866,6 +10988,7 @@ window.addEventListener('DOMContentLoaded',()=>{
     title.textContent=cfg.title;
     list.innerHTML='';
     cfg.items.forEach(([name,desc,action])=>{
+      if(typeof window.allowedMobileMenuItem==='function'&&!window.allowedMobileMenuItem(key,name))return;
       const b=document.createElement('button');
       b.type='button';
       b.className='mobile-submenu-item';
@@ -11179,7 +11302,7 @@ wire(document,'erp');function frame(){let f=document.getElementById('cashCarryFr
 </script>
 <script id="strict-menu-permissions">
 (function(){
-const asm=['overview','finished','materials','comparison','salesproduction','yield','detail'],carry=['cash','items','comparison:summary','comparison:detail','costs','salaries','settings','other','all'];
+const asm=['overview','finished','materials','comparison','yield','detail'],carry=['cash','items','comparison:summary','comparison:detail','costs','salaries','settings','other','all'];
 function hide(el,allowed){if(el)el.classList.toggle('permission-hidden',!allowed)}
 window.refreshAllowedMenus=function(){
  if(!currentAppUser)return;
@@ -11190,13 +11313,15 @@ window.refreshAllowedMenus=function(){
  document.querySelectorAll('button[onclick]').forEach(el=>{const oc=el.getAttribute('onclick')||'',m=oc.match(/showModule\('([^']+)'\)/);if(!m)return;if(el.classList.contains('erp-menu-trigger')&&m[1]==='financial')return;if(el.id==='financialTab')return;const report=oc.match(/showAssemblyReportTab\('([^']+)'\)/);hide(el,report?canViewReport('assembly',report[1]):canViewModule(m[1]))});
  document.querySelectorAll('[data-submodule],[data-financial-module]').forEach(el=>hide(el,canViewModule(el.dataset.submodule||el.dataset.financialModule)));
  document.querySelectorAll('[data-assembly-sub],[data-side-assembly-tab],[data-assembly-tab]').forEach(el=>hide(el,canViewReport('assembly',el.dataset.assemblySub||el.dataset.sideAssemblyTab||el.dataset.assemblyTab)));
+ document.querySelectorAll('[data-side-sales-report]').forEach(el=>hide(el,canViewReport('sales',el.dataset.sideSalesReport)));
+ document.querySelectorAll('[data-sales-sub]').forEach(el=>hide(el,canViewReport('sales',el.dataset.salesSub)));
  document.querySelectorAll('.erp-dropdown button').forEach(el=>{const action=el.getAttribute('onclick')||'',m=action.match(/openCarryReport\('([^']+)'\)/);if(m)hide(el,canViewReport('cashcarry',m[1]))});
- hide(document.getElementById('financialSideReports'),financial);hide(document.getElementById('assemblySideReports'),canViewModule('assembly'));
+ hide(document.getElementById('financialSideReports'),financial);hide(document.getElementById('assemblySideReports'),canViewModule('assembly'));hide(document.getElementById('salesSideReports'),canViewModule('sales'));
  const frame=document.getElementById('cashCarryFrame');try{frame?.contentWindow.refreshReportPermissions?.()}catch{}
  let empty=document.getElementById('noAllowedReports');const any=['home','sales','financial','yearcompare','cash','assembly','forecast','settings','cashcarry'].some(canViewModule);
  if(!any){document.querySelectorAll('.module.active').forEach(el=>el.classList.remove('active'));if(!empty){empty=document.createElement('div');empty.id='noAllowedReports';empty.style.cssText='padding:30px';empty.textContent='No reports assigned. Please contact your administrator.';document.querySelector('main').append(empty)}}else empty?.remove();
 };
-window.allowedMobileMenuItem=function(menu,title){if(menu==='sales')return canViewModule('sales');if(menu==='financial'){const keys={'Financial Summary':'financial','Year Comparison':'yearcompare','Cash Flow':'cash'};return canViewModule(keys[title])}const buttons=[...document.querySelectorAll('.erp-menu[data-menu="'+menu+'"] .erp-dropdown button')],button=buttons.find(b=>b.querySelector('b')?.textContent.trim()===title);if(!button)return false;const oc=button.getAttribute('onclick')||'',m=oc.match(/openCarryReport\('([^']+)'\)/);return m?canViewReport('cashcarry',m[1]):canViewReport('assembly',button.dataset.assemblySub)};
+window.allowedMobileMenuItem=function(menu,title){if(menu==='sales'){const keys={'Item Sales Report':'items','Sales & Production Summary':'summary','Potato Purchase & Rates':'potato'};return canViewReport('sales',keys[title])}if(menu==='financial'){const keys={'Financial Summary':'financial','Year Comparison':'yearcompare','Cash Flow':'cash'};return canViewModule(keys[title])}const buttons=[...document.querySelectorAll('.erp-menu[data-menu="'+menu+'"] .erp-dropdown button')],button=buttons.find(b=>b.querySelector('b')?.textContent.trim()===title);if(!button)return false;const oc=button.getAttribute('onclick')||'',m=oc.match(/openCarryReport\('([^']+)'\)/);return m?canViewReport('cashcarry',m[1]):canViewReport('assembly',button.dataset.assemblySub)};
 window.addEventListener('load',()=>{const old=showModule;window.showModule=function(key){if(currentAppUser&&!canViewModule(key)){if(key==='financial'){key=['financial','yearcompare','cash'].find(canViewModule);if(!key)return}else return}const result=old(key);if(currentAppUser&&key==='assembly'){const active=document.querySelector('.assembly-report-tab.active')?.dataset.assemblyTab;if(!active||!canViewReport('assembly',active)){const first=asm.find(k=>canViewReport('assembly',k));if(first)showAssemblyReportTab(first);else document.querySelectorAll('.assembly-report-panel').forEach(p=>p.classList.remove('active'))}}refreshAllowedMenus();return result};const login=completeLogin;window.completeLogin=function(user){const result=login(user);refreshAllowedMenus();return result};document.getElementById('cashCarryFrame')?.addEventListener('load',refreshAllowedMenus);refreshAllowedMenus()});
 window.addEventListener('storage',e=>{if(e.key==='brm-user-access-v1')refreshAllowedMenus()});
 })();
